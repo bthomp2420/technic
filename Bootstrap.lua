@@ -1,7 +1,7 @@
 function GetAPI()
 	local function download(user, name, path)
 		if not fs.exists(path) then
-			local data = http.get(('https://raw.github.com/%s/%s/master/%s'):format(self.user, self.name, path))
+			local data = http.get(('https://raw.github.com/%s/%s/master/%s'):format(user, name, path))
 			local h = fs.open(path, 'w')
 			local text = data.readAll()
 			h.write(text)
