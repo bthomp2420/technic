@@ -30,47 +30,46 @@ TurtleDriver = class(
 		end
 	end)
 
-function TurtleDriver:_wrapCall(f, ...)
+function TurtleDriver:_wrapCall(name, f, ...)
 	local result = {}
 	local args = {...}
 	local success, error = pcall(function() result = { f(unpack(args)) } end)
 	if not success then
-		print("Unexpected error in turtle API:")
-		print(debug.traceback())
+		print("Unexpected error in turtle API: "..name)
 		error(error)
 	end
 	return unpack(result)
 end
 
-function TurtleDriver:_getItemCount(...) return self:_wrapCall(turtle.getItemCount, ...) end
-function TurtleDriver:_getItemSpace(...) return self:_wrapCall(turtle.getItemSpace, ...) end
+function TurtleDriver:_getItemCount(...) return self:_wrapCall("getItemCount", turtle.getItemCount, ...) end
+function TurtleDriver:_getItemSpace(...) return self:_wrapCall("getItemSpace", turtle.getItemSpace, ...) end
 
-function TurtleDriver:_select(...) return self:_wrapCall(turtle.select, ...) end
-function TurtleDriver:_compareTo(...) return self:_wrapCall(turtle.compareTo, ...) end
-function TurtleDriver:_drop(...) return self:_wrapCall(turtle.drop, ...) end
+function TurtleDriver:_select(...) return self:_wrapCall("select", turtle.select, ...) end
+function TurtleDriver:_compareTo(...) return self:_wrapCall("compareTo", turtle.compareTo, ...) end
+function TurtleDriver:_drop(...) return self:_wrapCall("drop", turtle.drop, ...) end
 
-function TurtleDriver:_refuel(...) return self:_wrapCall(turtle.refuel, ...) end
-function TurtleDriver:_getFuelLevel(...) return self:_wrapCall(turtle.getFuelLevel, ...) end
+function TurtleDriver:_refuel(...) return self:_wrapCall("refuel", turtle.refuel, ...) end
+function TurtleDriver:_getFuelLevel(...) return self:_wrapCall("getFuelLevel", turtle.getFuelLevel, ...) end
 
-function TurtleDriver:_attack(...) return self:_wrapCall(turtle.attack, ...) end
-function TurtleDriver:_attackDown(...) return self:_wrapCall(turtle.attackDown, ...) end
-function TurtleDriver:_attackUp(...) return self:_wrapCall(turtle.attackUp, ...) end
+function TurtleDriver:_attack(...) return self:_wrapCall("attack", turtle.attack, ...) end
+function TurtleDriver:_attackDown(...) return self:_wrapCall("attackDown", turtle.attackDown, ...) end
+function TurtleDriver:_attackUp(...) return self:_wrapCall("attackUp", turtle.attackUp, ...) end
 
-function TurtleDriver:_detect(...) return self:_wrapCall(turtle.detect, ...) end
-function TurtleDriver:_detectUp(...) return self:_wrapCall(turtle.detectUp, ...) end
-function TurtleDriver:_detectDown(...) return self:_wrapCall(turtle.detectDown, ...) end
+function TurtleDriver:_detect(...) return self:_wrapCall("detect", turtle.detect, ...) end
+function TurtleDriver:_detectUp(...) return self:_wrapCall("detectUp", turtle.detectUp, ...) end
+function TurtleDriver:_detectDown(...) return self:_wrapCall("detectDown", turtle.detectDown, ...) end
 
-function TurtleDriver:_dig(...) return self:_wrapCall(turtle.dig, ...) end
-function TurtleDriver:_digUp(...) return self:_wrapCall(turtle.digUp, ...) end
-function TurtleDriver:_digDown(...) return self:_wrapCall(turtle.digDown, ...) end
+function TurtleDriver:_dig(...) return self:_wrapCall("dig", turtle.dig, ...) end
+function TurtleDriver:_digUp(...) return self:_wrapCall("digUp", turtle.digUp, ...) end
+function TurtleDriver:_digDown(...) return self:_wrapCall("digDown", turtle.digDown, ...) end
 
-function TurtleDriver:_forward(...) return self:_wrapCall(turtle.forward, ...) end
-function TurtleDriver:_back(...) return self:_wrapCall(turtle.back, ...) end
-function TurtleDriver:_up(...) return self:_wrapCall(turtle.up, ...) end
-function TurtleDriver:_down(...) return self:_wrapCall(turtle.down, ...) end
+function TurtleDriver:_forward(...) return self:_wrapCall("forward", turtle.forward, ...) end
+function TurtleDriver:_back(...) return self:_wrapCall("back", turtle.back, ...) end
+function TurtleDriver:_up(...) return self:_wrapCall("up", turtle.up, ...) end
+function TurtleDriver:_down(...) return self:_wrapCall("down", turtle.down, ...) end
 
-function TurtleDriver:_turnLeft(...) return self:_wrapCall(turtle.turnLeft, ...) end
-function TurtleDriver:_turnRight(...) return self:_wrapCall(turtle.turnRight, ...) end
+function TurtleDriver:_turnLeft(...) return self:_wrapCall("turnLeft", turtle.turnLeft, ...) end
+function TurtleDriver:_turnRight(...) return self:_wrapCall("turnRight", turtle.turnRight, ...) end
 
 function TurtleDriver:SavePosition()
 	return SaveTable(".save/driver_pos_"..self._id,
