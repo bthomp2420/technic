@@ -10,11 +10,11 @@ function GetAPI()
 	end
 
 	fs.makeDir("apis")
-	GitHubRawGet("eric-wieser", "computercraft-github", "apis/dkjson")
-	GitHubRawGet("eric-wieser", "computercraft-github", "apis/github")
+	download("eric-wieser", "computercraft-github", "apis/dkjson")
+	download("eric-wieser", "computercraft-github", "apis/github")
 
 	fs.makeDir("programs")
-	GitHubRawGet("eric-wieser", "computercraft-github", "programs/github")
+	download("eric-wieser", "computercraft-github", "programs/github")
 
 	return dofile("apis/github")
 end
