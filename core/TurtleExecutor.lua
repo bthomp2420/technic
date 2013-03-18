@@ -79,6 +79,7 @@ function TurtleExecutor:_restore()
 		end
 		table.sort(files, compare)
 		for i, file in ipairs(files) do
+			print(("Loading stack file: %s"):format(file))
 			local t = LoadTable(fs.combine(".save/stack", file))
 			if t then
 				self:Push(t)
