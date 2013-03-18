@@ -202,7 +202,8 @@ function TurtleDriver:Update()
 			self._nextUpdate = 64
 		end
 	end
-	return self:_getFuelLevel() > 0
+	local fuelLevel = self:_getFuelLevel()
+	return fuelLevel == "unlimited" or fuelLevel > 0
 end
 
 function TurtleDriver:AttackForward()
