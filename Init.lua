@@ -23,8 +23,9 @@ Include("core/TurtleDriver.lua")
 Include("core/TurtleExecutor.lua")
 
 local driver = TurtleDriver()
-local executor = TurtleExecutor()
+driver:LoadPosition()
 
+local executor = TurtleExecutor()
 for i, file in ipairs(fs.list("modules")) do
 	local result = Include(fs.combine("modules", file))
 	if executor:AddHandler(result) then
