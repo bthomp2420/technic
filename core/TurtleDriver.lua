@@ -33,10 +33,10 @@ TurtleDriver = class(
 function TurtleDriver:_wrapCall(name, f, ...)
 	local result = {}
 	local args = {...}
-	local success, error = pcall(function() result = { f(unpack(args)) } end)
+	local success, err = pcall(function() result = { f(unpack(args)) } end)
 	if not success then
 		print("Unexpected error in turtle API: "..name)
-		error(error)
+		error(err)
 	end
 	return unpack(result)
 end
