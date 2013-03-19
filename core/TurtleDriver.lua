@@ -339,3 +339,5 @@ function TurtleDriver:MineUp()
 		end
 	end
 end
+
+Instrument(TurtleDriver, "TurtleDriver")

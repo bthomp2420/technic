@@ -130,3 +130,6 @@ function TurtleExecutor:Run(driver)
 		end
 	end
 end
+
+Instrument(TurtleHandler, "TurtleHandler")
+Instrument(TurtleExecutor, "TurtleExecutor")

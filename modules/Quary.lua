@@ -111,4 +111,5 @@ function QuaryHandler:Start(executor, driver, w, h, d)
 	executor:Push(desc)
 end
 
+Instrument(QuaryHandler, "QuaryHandler")
 return QuaryHandler()
