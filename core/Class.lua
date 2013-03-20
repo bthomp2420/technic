@@ -1,5 +1,6 @@
 function class(base, init)
    local c = {}    -- a new class instance
+   c.__instrumented_functions = { }
    if not init and type(base) == 'function' then
       init = base
       base = nil
@@ -7,6 +8,11 @@ function class(base, init)
     -- our new class is a shallow copy of the base class!
       for i,v in pairs(base) do
          c[i] = v
+      end
+      for i,v in pairs(base) do
+         if type(v) == "function" then
+            c.__instrumented_functions[i] = false
+         end
       end
       c._base = base
    end

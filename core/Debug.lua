@@ -1,6 +1,5 @@
+__isUnwindingStack = false
 function __instrument_class(t, tname)
-	local __isUnwindingStack = false
-
 	print (("Instrumenting Class %s"):format(tname))
 	local function __instrument_function(f, fname, ...)
 		__isUnwindingStack = false
@@ -22,14 +21,16 @@ function __instrument_class(t, tname)
 			end
 			error(e)
 		end
-		
+
 		return unpack(r)
 	end
 
+	t.__instrumented_functions = { }
 	for fname, f in pairs(t) do
-		if type(f) == "function" then
+		if type(f) == "function" and not t.__instrumented_functions[fname] then
 			local name = ("%s:%s"):format(tname, fname)
 			t[fname] = function(...) return __instrument_function(f, name, ...) end
+			t.__instrumented_functions[fname] = true
 		end
 	end
 end
