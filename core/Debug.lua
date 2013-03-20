@@ -1,5 +1,4 @@
 local __isUnwindingStack = false
-
 function __instrument_class(t, tname)
 	print (("Instrumenting Class %s"):format(tname))
 	local function __instrument_function(f, fname, ...)

@@ -105,7 +105,8 @@ function TurtleExecutor:Update()
 		local desc = self._programStack[count]
 		local handler = self._handlerStack[count]
 		local result = false
-		pcall(function() result = handler:Run(self, driver, desc) end)
+		local exec = self
+		pcall(function() result = handler:Run(exec, driver, desc) end)
 		if not result then
 			self:Pop()
 		end
@@ -134,9 +135,9 @@ function TurtleExecutor:Run(driver)
 
 	local exec = self
 	while true do
-		local success, err = pcall(function() exec:Update() end)
-		if not success then
-			print(("Unhandled error occurred: %s"):format(tostring(err)))
+		local s, err = pcall(function() exec:Update() end)
+		if not s then
+			print(("Unhandled error caught: %s"):format(tostring(err)))
 			print("Shutting down...")
 			break
 		end
