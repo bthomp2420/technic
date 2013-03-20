@@ -99,6 +99,24 @@ function TurtleExecutor:AddHandler(handler)
 	return result
 end
 
+function TurtleExecutor:Update()
+	local count = #self._programStack
+	if count > 0 then
+		local desc = self._programStack[count]
+		local handler = self._handlerStack[count]
+		local result = false
+		pcall(function() result = handler:Run(self, driver, desc) end)
+		if not result then
+			self:Pop()
+		end
+		if self._clean ~= #self._programStack then
+			self:Store()
+		end
+	else
+		sleep(1.0)
+	end
+end
+
 function TurtleExecutor:Run(driver)
 	for i, handler in ipairs(self._handlers) do
 		handler:Init(self, driver)
@@ -115,20 +133,11 @@ function TurtleExecutor:Run(driver)
 	end
 
 	while true do
-		local count = #self._programStack
-		if count > 0 then
-			local desc = self._programStack[count]
-			local handler = self._handlerStack[count]
-			local result = false
-			pcall(function() result = handler:Run(self, driver, desc) end)
-			if not result then
-				self:Pop()
-			end
-			if self._clean ~= #self._programStack then
-				self:Store()
-			end
-		else
-			sleep(1.0)
+		local success, err = pcall(function() self:Update() end)
+		if not success then
+			print(("Unhandled error occurred: %s"):format(tostring(err)))
+			print("Shutting down...")
+			break
 		end
 	end
 end
