@@ -132,8 +132,9 @@ function TurtleExecutor:Run(driver)
 		self:Store()
 	end
 
+	local exec = self
 	while true do
-		local success, err = pcall(function() self:Update() end)
+		local success, err = pcall(function() exec:Update() end)
 		if not success then
 			print(("Unhandled error occurred: %s"):format(tostring(err)))
 			print("Shutting down...")

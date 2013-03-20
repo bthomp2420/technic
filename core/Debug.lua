@@ -9,11 +9,11 @@ function __instrument_class(t, tname)
 		local s, err = pcall(function() r = {f(unpack(p))} end)
 		if not s then
 			if not __isUnwindingStack then
-				print("Unhandle error caught:")
-				print(("%s"):format(fname))
+				print(("Unhandle error caught:"):format(tostring(err))
+				print(("--> %s"):format(fname))
+				__isUnwindingStack = true
 			else
 				print((" in %s"):format(fname))
-				__isUnwindingStack = true
 			end
 			error(err)
 		end
