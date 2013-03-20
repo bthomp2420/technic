@@ -10,6 +10,8 @@ function Include(file)
 			local chunk = loadstring(data, file)
 			if chunk ~= nil then
 				result = setfenv(chunk, context)()
+			else
+				print(("Failed to load %s..."):format(file))
 			end
 		end
 	end
