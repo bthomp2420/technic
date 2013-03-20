@@ -1,21 +1,20 @@
 function __instrument_class(t, tname)
 	print (("Instrumenting Class %s"):format(tname))
-	local function __instrument(f, fname, ...)
+	local function __instrument_function(f, fname, ...)
 		local r
 		local p = {...}
-		local s, o = pcall(function() r = {f(unpack(p))} end)
+		local s, err = pcall(function() r = {f(unpack(p))} end)
 		if not s then
 			print(fname)
-			error(o)
+			error(err)
 		end
 		return unpack(r)
 	end
-
 	for fname, v in pairs(t) do
 		if type(v) == "function" then
 			local name = ("%s:%s"):format(tname, fname)
 			print((" + %s"):format(name))
-			t[fname] = __instrument(v, name)
+			t[fname] =  function(...) return __instrument_function(f, fname, ...) end
 		end
 	end
 end
