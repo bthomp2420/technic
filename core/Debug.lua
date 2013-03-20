@@ -1,4 +1,4 @@
-function Instrument(t, tname)
+function instrument(t, tname)
 	print(("Instrumenting Class %s").format(tname))
 	local function __instrument(f, fname, ...)
 		local r
