@@ -119,7 +119,9 @@ function TurtleExecutor:Run(driver)
 		if count > 0 then
 			local desc = self._programStack[count]
 			local handler = self._handlerStack[count]
-			if not handler:Run(self, driver, desc) then
+			local result = false
+			pcall(function() result = handler:Run(self, driver, desc) end)
+			if not result then
 				self:Pop()
 			end
 			if self._clean ~= #self._programStack then

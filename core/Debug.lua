@@ -1,11 +1,19 @@
+local __isUnwindingStack = false
 function __instrument_class(t, tname)
 	print (("Instrumenting Class %s"):format(tname))
 	local function __instrument_function(f, fname, ...)
 		local r
 		local p = {...}
+		__isUnwindingStack = false
 		local s, err = pcall(function() r = {f(unpack(p))} end)
 		if not s then
-			print(fname)
+			if not __isUnwindingStack then
+				print("Unhandle error caught:")
+				print(("%s"):format(fname))
+			else
+				print((" in %s"):format(fname)
+				__isUnwindingStack = true
+			end
 			error(err)
 		end
 		return unpack(r)
@@ -13,8 +21,7 @@ function __instrument_class(t, tname)
 	for fname, f in pairs(t) do
 		if type(f) == "function" then
 			local name = ("%s:%s"):format(tname, fname)
-			print((" + %s"):format(name))
-			t[fname] =  function(...) return __instrument_function(f, fname, ...) end
+			t[fname] =  function(...) return __instrument_function(f, name, ...) end
 		end
 	end
 end
