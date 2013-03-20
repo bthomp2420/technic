@@ -5,16 +5,16 @@ function __instrument_class(t, tname)
 		local r
 		local p = {...}
 		__isUnwindingStack = false
-		local s, err = pcall(function() r = {f(unpack(p))} end)
+		local s, e = pcall(function() r = {f(unpack(p))} end)
 		if not s then
 			if not __isUnwindingStack then
-				print(("Unhandle error caught:"):format(tostring(err))
+				print(("Unhandle error caught: %s"):format(tostring(e))
 				print(("--> %s"):format(fname))
 				__isUnwindingStack = true
 			else
 				print((" in %s"):format(fname))
 			end
-			error(err)
+			error(e)
 		end
 		return unpack(r)
 	end

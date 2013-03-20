@@ -102,10 +102,10 @@ end
 function TurtleExecutor:Update()
 	local count = #self._programStack
 	if count > 0 then
+		local exec = self
 		local desc = self._programStack[count]
 		local handler = self._handlerStack[count]
 		local result = false
-		local exec = self
 		pcall(function() result = handler:Run(exec, driver, desc) end)
 		if not result then
 			self:Pop()
