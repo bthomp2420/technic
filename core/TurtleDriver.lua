@@ -340,4 +340,4 @@ function TurtleDriver:MineUp()
 	end
 end
 
-instrument(TurtleDriver, "TurtleDriver")
+__instrument_class(TurtleDriver, "TurtleDriver")

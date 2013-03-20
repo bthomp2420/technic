@@ -17,8 +17,8 @@ function Include(file)
 end
 
 Include("core/Serialize.lua")
-Include("core/Class.lua")
 Include("core/Debug.lua")
+Include("core/Class.lua")
 Include("core/Table.lua")
 Include("core/TurtleDriver.lua")
 Include("core/TurtleExecutor.lua")

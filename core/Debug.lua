@@ -1,5 +1,5 @@
-function instrument(t, tname)
-	print(("Instrumenting Class %s").format(tname))
+function __instrument_class(t, tname)
+	print (("Instrumenting Class %s"):format(tname))
 	local function __instrument(f, fname, ...)
 		local r
 		local p = pack(...)
@@ -13,8 +13,8 @@ function instrument(t, tname)
 
 	for fname, v in ipairs(t) do
 		if type(v) == "function" then
-			local name = ("%s:%s").format(tname, fname)
-			print((" + %s").format(name))
+			local name = ("%s:%s"):format(tname, fname)
+			print((" + %s"):format(name))
 			t[fname] = __instrument(v, name)
 		end
 	end

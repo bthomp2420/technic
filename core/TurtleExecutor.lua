@@ -131,5 +131,5 @@ function TurtleExecutor:Run(driver)
 	end
 end
 
-instrument(TurtleHandler, "TurtleHandler")
-instrument(TurtleExecutor, "TurtleExecutor")
+__instrument_class(TurtleHandler, "TurtleHandler")
+__instrument_class(TurtleExecutor, "TurtleExecutor")

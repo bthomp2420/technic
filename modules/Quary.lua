@@ -111,5 +111,5 @@ function QuaryHandler:Start(executor, driver, w, h, d)
 	executor:Push(desc)
 end
 
-instrument(QuaryHandler, "QuaryHandler")
+__instrument_class(QuaryHandler, "QuaryHandler")
 return QuaryHandler()
