@@ -10,8 +10,8 @@ function __instrument_class(t, tname)
 		end
 		return unpack(r)
 	end
-	for fname, v in pairs(t) do
-		if type(v) == "function" then
+	for fname, f in pairs(t) do
+		if type(f) == "function" then
 			local name = ("%s:%s"):format(tname, fname)
 			print((" + %s"):format(name))
 			t[fname] =  function(...) return __instrument_function(f, fname, ...) end
