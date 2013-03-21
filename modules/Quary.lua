@@ -1,4 +1,4 @@
-QuaryHandler = class(TurtleHandler, function (o) end)
+QuaryHandler = class("QuaryHandler", TurtleHandler, function (o) end)
 
 function QuaryHandler:Run(executor, driver, desc)
 	local w, h, d = desc.w, desc.h, desc.d
@@ -111,5 +111,4 @@ function QuaryHandler:Start(executor, driver, w, h, d)
 	executor:Push(desc)
 end
 
-__instrument_class(QuaryHandler, "QuaryHandler")
 return QuaryHandler()

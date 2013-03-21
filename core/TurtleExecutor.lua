@@ -1,4 +1,4 @@
-TurtleExecutor = class(
+TurtleExecutor = class("TurtleExecutor",
 	function(o)
 		o._programStack = { }
 		o._handlerStack = { }
@@ -14,7 +14,7 @@ TurtleExecutor = class(
 		end
 	end)
 
-TurtleHandler = class(function(o) end)
+TurtleHandler = class("TurtleHandler", function(o) end)
 
 function TurtleHandler:Run(executor, driver, desc)
 	
@@ -70,10 +70,11 @@ function TurtleExecutor:Store()
 	end
 end
 
-function TurtleExecutor:_restore()
+function TurtleExecutor:Resume()
 	local result = false
 	local files = fs.list(".save/stack")
 	if #files > 0 then
+		print("Resuming...")
 		local function compare(a, b)
 			return tonumber(a) < tonumber(b)
 		end
@@ -81,7 +82,7 @@ function TurtleExecutor:_restore()
 		for i, file in ipairs(files) do
 			print(("Loading stack file: %s"):format(file))
 			local t = LoadTable(fs.combine(".save/stack", file))
-			if t then
+			if t ~= nil then
 				self:Push(t)
 			end
 		end
@@ -99,14 +100,19 @@ function TurtleExecutor:AddHandler(handler)
 	return result
 end
 
-function TurtleExecutor:Update()
+function TurtleExecutor:Update(driver)
 	local count = #self._programStack
 	if count > 0 then
 		local exec = self
 		local desc = self._programStack[count]
 		local handler = self._handlerStack[count]
 		local result = false
-		pcall(function() result = handler:Run(exec, driver, desc) end)
+		if desc ~= nil then
+			local success, err = pcall(function() result = handler:Run(exec, driver, desc) end)
+			if not success then
+				print(err)
+			end
+		end
 		if not result then
 			self:Pop()
 		end
@@ -119,11 +125,13 @@ function TurtleExecutor:Update()
 end
 
 function TurtleExecutor:Run(driver)
+	print("Initializing...")
 	for i, handler in ipairs(self._handlers) do
 		handler:Init(self, driver)
 	end
 
-	if not self:_restore() then
+	if not self:Resume() then
+		print("Starting...")
 		for i, handler in ipairs(self._handlers) do
 			handler:Startup(self, driver)
 		end
@@ -135,7 +143,7 @@ function TurtleExecutor:Run(driver)
 
 	local exec = self
 	while true do
-		local s, err = pcall(function() exec:Update() end)
+		local s, err = pcall(function() exec:Update(driver) end)
 		if not s then
 			print(("Unhandled error caught: %s"):format(tostring(err)))
 			print("Shutting down...")
@@ -143,6 +151,3 @@ function TurtleExecutor:Run(driver)
 		end
 	end
 end
-
-__instrument_class(TurtleHandler, "TurtleHandler")
-__instrument_class(TurtleExecutor, "TurtleExecutor")

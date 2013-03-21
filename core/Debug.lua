@@ -1,36 +1,39 @@
-__isUnwindingStack = false
-function __instrument_class(t, tname)
-	print (("Instrumenting Class %s"):format(tname))
-	local function __instrument_function(f, fname, ...)
-		__isUnwindingStack = false
+local __isUnwindingStack = false
 
-		local r
-		local p = {...}
-		local s, e = pcall(function() r = {f(unpack(p))} end)
-		if not s then
+function __instrument_class(t, tname)
+	print(("Instrumenting Class %s"):format(tname))
+	local function __instrument_function(f, fname, ...)
+		local result
+		local args = { ... }
+
+		__isUnwindingStack = false
+		local success, err = pcall(function() result = { f(unpack(args)) } end)
+		if not success then
 			if not __isUnwindingStack then
-				if e then
-					print(("Error: %s"):format(tostring(e))
+				__isUnwindingStack = true
+
+				if err then
+					print(("Error: %s"):format(tostring(err)))
 				else
 					print("Error: <unknown error>")
 				end
+
 				print(("--> %s"):format(fname))
-				__isUnwindingStack = true
+				error(err)
 			else
 				print((" in %s"):format(fname))
+				error(err)
 			end
-			error(e)
 		end
 
-		return unpack(r)
+		return unpack(result)
 	end
 
-	t.__instrumented_functions = { }
 	for fname, f in pairs(t) do
-		if type(f) == "function" and not t.__instrumented_functions[fname] then
+		if type(f) == "function" then
 			local name = ("%s:%s"):format(tname, fname)
+			print(("+ %s"):format(name))
 			t[fname] = function(...) return __instrument_function(f, name, ...) end
-			t.__instrumented_functions[fname] = true
 		end
 	end
 end

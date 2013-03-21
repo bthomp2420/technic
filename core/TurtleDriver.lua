@@ -2,7 +2,7 @@ local k_no_cleanup = 0
 local k_partial_cleanup = 1
 local k_full_cleanup = 2
 
-TurtleDriver = class(
+TurtleDriver = class("TurtleDriver",
 	function(drv, id)
 		if not id then id = "default" end
 		
@@ -28,6 +28,8 @@ TurtleDriver = class(
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
 		end
+
+		print("TurtleDriver Initialized")
 	end)
 
 function TurtleDriver:_wrapCall(name, f, ...)
@@ -339,5 +341,3 @@ function TurtleDriver:MineUp()
 		end
 	end
 end
-
-__instrument_class(TurtleDriver, "TurtleDriver")
