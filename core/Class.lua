@@ -66,18 +66,17 @@ function class(name, base, init)
       end
    end
 
-   function c_mt:Instrument()
+   function c_mt:__instrument()
       if not self._instrumented then
-         local c = self.__class
-         __instrument_class(c, c.__name)
+         __instrument_class(self, self.__name)
          self._instrumented = true
       end
    end
 
-   c_mt.__call = function(_, ...)
+   function c_mt:__call(...)
       local o = { }
       setmetatable(o, c_mt)
-      c_mt:Instrument()
+      self:__instrument()
       __init(o, ...)
       return o
    end
