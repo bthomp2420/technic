@@ -83,10 +83,10 @@ function TurtleExecutor:Resume()
 		end
 		table.sort(files, compare)
 		for i, file in ipairs(files) do
-			print(("Loading stack file: %s"):format(file))
 			local t = LoadTable(fs.combine(".save/stack", file))
 			if t ~= nil then
 				self:Push(t)
+				self._storedStackSize = self._storedStackSize + 1
 			end
 		end
 		result = true
@@ -121,7 +121,7 @@ function TurtleExecutor:Update(driver)
 		if not result then
 			self:Pop()
 		end
-		
+
 		self:Store()
 	else
 		sleep(1.0)
