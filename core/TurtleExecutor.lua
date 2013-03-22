@@ -5,7 +5,7 @@ TurtleExecutor = class("TurtleExecutor",
 		o._programStack = { }
 		o._handlerStack = { }
 		o._handlers = { }
-		o._clean = 0
+		o._storedStackSize = 0
 
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
@@ -53,20 +53,21 @@ function TurtleExecutor:Pop()
 		table.remove(self._programStack, count)
 		table.remove(self._handlerStack, count)
 	end
-	self._clean = #self._programStack
 	return result
 end
 
 function TurtleExecutor:Store()
-	for i = self._clean + 1, #self._programStack, 1 do
-		SaveTable(fs.combine(".save/stack", tostring(i)), self._programStack[i])
-	end
-	self._clean = #self._programStack
-	local files = fs.list(".save/stack")
-	if #files > 0 then
-		for i, file in ipairs(files) do
-			if tonumber(file) > self._clean then
-				fs.delete(fs.combine(".save/stack", file))
+	if self._storedStackSize ~= #self._programStack then
+		for i = self._storedStackSize + 1, #self._programStack, 1 do
+			SaveTable(fs.combine(".save/stack", tostring(i)), self._programStack[i])
+		end
+		self._storedStackSize = #self._programStack
+		local files = fs.list(".save/stack")
+		if #files > 0 then
+			for i, file in ipairs(files) do
+				if tonumber(file) > self._storedStackSize then
+					fs.delete(fs.combine(".save/stack", file))
+				end
 			end
 		end
 	end
@@ -121,9 +122,7 @@ function TurtleExecutor:Update(driver)
 			self:Pop()
 		end
 		
-		if self._clean ~= #self._programStack then
-			self:Store()
-		end
+		self:Store()
 	else
 		sleep(1.0)
 	end
@@ -140,9 +139,6 @@ function TurtleExecutor:Run(driver)
 		for i, handler in ipairs(self._handlers) do
 			handler:Startup(self, driver)
 		end
-	end
-
-	if self._clean ~= #self._programStack then
 		self:Store()
 	end
 
