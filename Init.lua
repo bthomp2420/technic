@@ -3,16 +3,16 @@ local context = getfenv()
 local __pragma_once = { }
 local __FILE__ = "Init.lua"
 local __include_stack = { __FILE__ }
-__pragma_once[__FILE__] = true
 
-function PragmaOnce()
+__pragma_once[__FILE__] = true
+function PRAGMA_ONCE()
 	if not __pragma_once[__FILE__] then return end
 	error(__pragma_once)
 end
 
 function Include(file)
 	local result
-	if fs.exists(file) and not __pragma_once[file] then
+	if fs.exists(file) then
 		local f = fs.open(file, "r")
 		if f ~= nil then
 			local data = f.readAll()
@@ -20,9 +20,10 @@ function Include(file)
 
 			local chunk = loadstring(data, file)
 			if chunk ~= nil then
-				__include_stack[#__include_stack+1] = file
+				table.insert(__include_stack, file)
 				__FILE__ = __include_stack[#__include_stack]
 				
+				print(("+ %s"):format(file))
 				local success, err = pcall(function() result = setfenv(chunk, context)() or true end)
 				if not success then
 					if not rawequal(err, __pragma_once) then
@@ -40,7 +41,6 @@ function Include(file)
 				print(("Failed to load %s..."):format(file))
 			end
 		end
-		
 	end
 	return result
 end
@@ -57,12 +57,12 @@ Require("core/Serialize.lua")
 Require("core/Debug.lua")
 Require("core/Class.lua")
 Require("core/Table.lua")
-Require("core/TurtleDriver.lua")
-Require("core/TurtleExecutor.lua")
 
+Require("core/TurtleDriver.lua")
 local driver = TurtleDriver()
 driver:LoadPosition()
 
+Require("core/TurtleExecutor.lua")
 local executor = TurtleExecutor()
 for i, file in ipairs(fs.list("modules")) do
 	local result = Include(fs.combine("modules", file))

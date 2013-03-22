@@ -1,3 +1,5 @@
+PRAGMA_ONCE()
+
 function SaveTable(file, t)
 	local data = serialize(t)
 	local f = fs.open(file, "w")

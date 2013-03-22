@@ -1,39 +1,46 @@
-local __isUnwindingStack = false
+PRAGMA_ONCE()
 
-function __instrument_class(t, tname)
-	print(("Instrumenting Class %s"):format(tname))
-	local function __instrument_function(f, fname, ...)
-		local result
-		local args = { ... }
+local function init_instrument_api()
+	local __isUnwindingStack = false
+	function __instrument_class(t, tname)
+		local function __instrument_function(f, fname, ...)
+			local result
+			local args = { ... }
 
-		__isUnwindingStack = false
-		local success, err = pcall(function() result = { f(unpack(args)) } end)
-		if not success then
-			if not __isUnwindingStack then
-				__isUnwindingStack = true
+			__isUnwindingStack = false
+			local success, err = pcall(function() result = { f(unpack(args)) } end)
+			if not success then
+				if not __isUnwindingStack then
+					__isUnwindingStack = true
 
-				if err then
-					print(("Error: %s"):format(tostring(err)))
+					if err then
+						print(("Error: %s"):format(tostring(err)))
+					else
+						print("Error: ???")
+					end
+
+					print(("--> %s"):format(fname))
+					error(err or "???")
 				else
-					print("Error: <unknown error>")
+					print((" in %s"):format(fname))
+					error(err or "???")
 				end
+			end
 
-				print(("--> %s"):format(fname))
-				error(err)
-			else
-				print((" in %s"):format(fname))
-				error(err)
+			if not result then return end
+			return unpack(result)
+		end
+
+		for fname, f in pairs(t) do
+			if type(f) == "function" then
+				local name = ("%s:%s"):format(tname, fname)
+				t[fname] = function(...) return __instrument_function(f, name, ...) end
 			end
 		end
-
-		return unpack(result)
 	end
-
-	for fname, f in pairs(t) do
-		if type(f) == "function" then
-			local name = ("%s:%s"):format(tname, fname)
-			print(("+ %s"):format(name))
-			t[fname] = function(...) return __instrument_function(f, name, ...) end
-		end
-	end
+	return __instrument_class
 end
+
+local __instrument_class = init_instrument_api()
+init_instrument_api = nil
+return __instrument_class

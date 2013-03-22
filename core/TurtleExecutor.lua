@@ -1,3 +1,5 @@
+PRAGMA_ONCE()
+
 TurtleExecutor = class("TurtleExecutor",
 	function(o)
 		o._programStack = { }
@@ -107,15 +109,18 @@ function TurtleExecutor:Update(driver)
 		local desc = self._programStack[count]
 		local handler = self._handlerStack[count]
 		local result = false
+		
 		if desc ~= nil then
 			local success, err = pcall(function() result = handler:Run(exec, driver, desc) end)
 			if not success then
 				print(err)
 			end
 		end
+		
 		if not result then
 			self:Pop()
 		end
+		
 		if self._clean ~= #self._programStack then
 			self:Store()
 		end
@@ -125,13 +130,13 @@ function TurtleExecutor:Update(driver)
 end
 
 function TurtleExecutor:Run(driver)
-	print("Initializing...")
+	print("TurtleExecutor: Initializing...")
 	for i, handler in ipairs(self._handlers) do
 		handler:Init(self, driver)
 	end
 
 	if not self:Resume() then
-		print("Starting...")
+		print("TurtleExecutor: Starting...")
 		for i, handler in ipairs(self._handlers) do
 			handler:Startup(self, driver)
 		end
@@ -143,11 +148,12 @@ function TurtleExecutor:Run(driver)
 
 	local exec = self
 	while true do
-		local s, err = pcall(function() exec:Update(driver) end)
-		if not s then
-			print(("Unhandled error caught: %s"):format(tostring(err)))
-			print("Shutting down...")
+		local success, err = pcall(function() exec:Update(driver) end)
+		if not success then
+			print(("Unhandled error caught: %s"):format(err))
 			break
 		end
 	end
+
+	print("TurtleExecutor: Shutting down...")
 end
