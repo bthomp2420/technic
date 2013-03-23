@@ -15,8 +15,8 @@ TurtleDriver = class("TurtleDriver",
 		drv._dx = 1
 		drv._dz = 0   
 
-		drv._selectSleepTime = 0.1
-		drv._dropSleepTime = 0.1
+		drv._selectSleepTime = 0.05
+		drv._dropSleepTime = 0.05
 		drv._retrySleepTime = 0.2
 		drv._moveSleepTime = 0.2
 		drv._digSleepTime = 0.05
@@ -25,7 +25,7 @@ TurtleDriver = class("TurtleDriver",
 
 		drv._nextUpdate = 16
 		drv._emptySlots = 0
-		drv._activeSlot = nil
+		drv._activeSlot = -1
 		drv._junkCount = 4
 
 		if not fs.isDir(".save") then
@@ -151,13 +151,16 @@ end
 
 function TurtleDriver:ProcessInventory(mode)
 	local result = 0
-	local initialSlot = self._activeSlot or 1
 
-	for i = _junkCount + 1, 16, 1 do
+	local junkCount = self._junkCount
+	local initialSlot = self._activeSlot
+	if initialSlot < 0 then initialSlot = 1 end
+
+	for i = junkCount + 1, 16, 1 do
 		if self:IsSlotEmpty(i) or (mode == k_full_cleanup and self:RefuelFromSlot(i)) then
 			result = result + 1
 		elseif mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
-			for j = 1, _junkCount, 1 do
+			for j = 1, junkCount, 1 do
 				if self:CompareSlots(i, j) then
 					if self:DropSlot(i) then
 						result = result + 1
@@ -169,7 +172,7 @@ function TurtleDriver:ProcessInventory(mode)
 	end
 
 	if mode ~= k_no_cleanup then
-		for i = 1, _junkCount, 1 do
+		for i = 1, junkCount, 1 do
 			 if (mode == k_full_cleanup or self:IsSlotFull(i)) then
 				local count = self:_getItemCount(i)
 				if count > 1 then
@@ -179,7 +182,7 @@ function TurtleDriver:ProcessInventory(mode)
 		end
 
 		local lastEmpty = 17
-		for i = _junkCount + 1, 16, 1 do
+		for i = junkCount + 1, 16, 1 do
 			if self:IsSlotEmpty(i) then
 				for j = lastEmpty - 1, i + 1, -1 do
 					if not self:IsSlotEmpty(j) and self:SelectSlot(j) then
