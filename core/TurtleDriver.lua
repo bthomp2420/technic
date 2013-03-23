@@ -25,7 +25,8 @@ TurtleDriver = class("TurtleDriver",
 
 		drv._nextUpdate = 16
 		drv._emptySlots = 0
-		drv._activeSlot = -1
+		drv._activeSlot = nil
+		drv._junkCount = 4
 
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
@@ -46,6 +47,7 @@ function TurtleDriver:_getItemSpace(...) return self.TurtleAPI.getItemSpace(...)
 function TurtleDriver:_select(...) return self.TurtleAPI.select(...) end
 function TurtleDriver:_compareTo(...) return self.TurtleAPI.compareTo(...) end
 function TurtleDriver:_drop(...) return self.TurtleAPI.drop(...) end
+function TurtleDriver:_transferTo(...) return self.TurtleAPI.transferTo(...) end
 
 function TurtleDriver:_refuel(...) return self.TurtleAPI.refuel(...) end
 function TurtleDriver:_getFuelLevel(...) return self.TurtleAPI.getFuelLevel(...) end
@@ -149,12 +151,13 @@ end
 
 function TurtleDriver:ProcessInventory(mode)
 	local result = 0
-	local initialSlot = self._activeSlot
-	for i = 5, 16, 1 do
+	local initialSlot = self._activeSlot or 1
+
+	for i = _junkCount + 1, 16, 1 do
 		if self:IsSlotEmpty(i) or (mode == k_full_cleanup and self:RefuelFromSlot(i)) then
 			result = result + 1
 		elseif mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
-			for j = 1, 4, 1 do
+			for j = 1, _junkCount, 1 do
 				if self:CompareSlots(i, j) then
 					if self:DropSlot(i) then
 						result = result + 1
@@ -164,14 +167,32 @@ function TurtleDriver:ProcessInventory(mode)
 			end
 		end
 	end
-	for i = 1, 4, 1 do
-		if mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
-			local count = self:_getItemCount(i)
-			if count > 1 then
-				self:DropSlot(i, count - 1)
+
+	if mode ~= k_no_cleanup then
+		for i = 1, _junkCount, 1 do
+			 if (mode == k_full_cleanup or self:IsSlotFull(i)) then
+				local count = self:_getItemCount(i)
+				if count > 1 then
+					self:DropSlot(i, count - 1)
+				end
 			end
 		end
+
+		local lastEmpty = 17
+		for i = _junkCount + 1, 16, 1 do
+			if self:IsSlotEmpty(i) then
+				for j = lastEmpty - 1, i + 1, -1 do
+					if not self:IsSlotEmpty(j) and self:SelectSlot(j) then
+						self:_transferTo(i)
+						break
+					end
+					lastEmpty = j
+				end
+			end
+			if lastEmpty <= i then break end 
+		end
 	end
+
 	self:SelectSlot(initialSlot)
 	return result
 end
