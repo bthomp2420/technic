@@ -144,9 +144,9 @@ function TurtleDriver:CompareSlots(a, b)
 end
 
 function TurtleDriver:DropSlot(a, c)
-	if self:SlotHasItems(a) and self:SelectSlot(a) and self:_drop(c) and (c or self:IsSlotEmpty(a)) then
+	if self:SlotHasItems(a) and self:SelectSlot(a) and self:_drop(c) then
 		sleep(self._dropSleepTime)
-		return true
+		return (c or self:IsSlotEmpty(a))
 	end
 	return false
 end
@@ -214,9 +214,9 @@ function TurtleDriver:ProcessInventory(mode)
 			if not self:IsSlotEmpty(chestSlot) then
 				self:DigForward()
 			end
-			if self:IsSlotEmpty(chestSlot) or (self:SelectSlot(chestSlot) and self:_place() and self:_detect()) then
-				for j = 1, 16, 1 do
-					if j ~= chestSlot and not self:IsSlotEmpty(j) and not self:DropSlot(j) then
+			if self:IsSlotEmpty(chestSlot) or (self:SelectSlot(chestSlot) and self:PlaceForward()) then
+				for i = 1, 16, 1 do
+					if i ~= chestSlot and not self:IsSlotEmpty(i) and not self:DropSlot(i) then
 						break
 					end
 				end
