@@ -4,6 +4,9 @@ local k_no_cleanup = 0
 local k_partial_cleanup = 1
 local k_full_cleanup = 2
 
+local k_inventory_mode_drop_junk = 0
+local k_inventory_mode_ender_chest = 1
+
 TurtleDriver = class("TurtleDriver",
 	function(drv, id)
 		if not id then id = "default" end
@@ -23,10 +26,12 @@ TurtleDriver = class("TurtleDriver",
 		drv._turnSleepTime = 0.05
 		drv._attackSleepTime = 0.05
 
+		drv._inventoryMode = k_inventory_mode_ender_chest
 		drv._nextUpdate = 16
 		drv._emptySlots = 0
 		drv._activeSlot = -1
 		drv._junkCount = 4
+		drv._chestSlot = 1
 
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
@@ -48,6 +53,7 @@ function TurtleDriver:_select(...) return self.TurtleAPI.select(...) end
 function TurtleDriver:_compareTo(...) return self.TurtleAPI.compareTo(...) end
 function TurtleDriver:_drop(...) return self.TurtleAPI.drop(...) end
 function TurtleDriver:_transferTo(...) return self.TurtleAPI.transferTo(...) end
+function TurtleDriver:_place(...) return self.TurtleAPI.place(...) end
 
 function TurtleDriver:_refuel(...) return self.TurtleAPI.refuel(...) end
 function TurtleDriver:_getFuelLevel(...) return self.TurtleAPI.getFuelLevel(...) end
@@ -160,43 +166,60 @@ function TurtleDriver:ProcessInventory(mode)
 		if self:IsSlotEmpty(i) or (mode == k_full_cleanup and self:RefuelFromSlot(i)) then
 			result = result + 1
 		elseif mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
-			for j = 1, junkCount, 1 do
-				if self:CompareSlots(i, j) then
-					if self:DropSlot(i) then
-						result = result + 1
+			if self._inventoryMode == k_inventory_mode_drop_junk then
+				for j = 1, junkCount, 1 do
+					if self:CompareSlots(i, j) then
+						if self:DropSlot(i) then
+							result = result + 1
+						end
+						break
 					end
-					break
 				end
 			end
 		end
 	end
 
 	if mode ~= k_no_cleanup then
-		for i = 1, junkCount, 1 do
-			 if (mode == k_full_cleanup or self:IsSlotFull(i)) then
-				local count = self:_getItemCount(i)
-				if count > 1 then
-					self:DropSlot(i, count - 1)
+		if self._inventoryMode == k_inventory_mode_drop_junk then
+			for i = 1, junkCount, 1 do
+				 if (mode == k_full_cleanup or self:IsSlotFull(i)) then
+					local count = self:_getItemCount(i)
+					if count > 1 then
+						self:DropSlot(i, count - 1)
+					end
 				end
 			end
-		end
 
-		local lastEmpty = 17
-		for i = junkCount + 1, 16, 1 do
-			if self:IsSlotEmpty(i) then
-				for j = lastEmpty - 1, i + 1, -1 do
-					if not self:IsSlotEmpty(j) and self:SelectSlot(j) then
-						self:_transferTo(i)
+			local lastEmpty = 17
+			for i = junkCount + 1, 16, 1 do
+				if self:IsSlotEmpty(i) then
+					for j = lastEmpty - 1, i + 1, -1 do
+						if not self:IsSlotEmpty(j) and self:SelectSlot(j) then
+							self:_transferTo(i)
+							break
+						end
+						lastEmpty = j
+					end
+				end
+				if lastEmpty <= i then break end 
+			end
+		elseif self._inventoryMode == k_inventory_mode_ender_chest and not self:_detect() then
+			if self:SelectSlot(drv._chestSlot) and self:_place() and self:_detect() then
+				for j = 1, 16, 1 do
+					if j ~= self._chestSlot and not self:IsSlotEmpty(j) and not self:DropSlot(j) then
 						break
 					end
-					lastEmpty = j
 				end
 			end
-			if lastEmpty <= i then break end 
 		end
 	end
 
+	if self:IsSlotEmpty(drv._chestSlot) and self:SelectSlot(drv._chestSlot) then
+		self:DigForward()
+	end
+	
 	self:SelectSlot(initialSlot)
+
 	return result
 end
 
