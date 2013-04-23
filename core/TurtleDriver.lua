@@ -159,13 +159,19 @@ function TurtleDriver:ProcessInventory(mode)
 	local result = 0
 
 	local junkCount = self._junkCount
+	if self._inventoryMode == k_inventory_mode_ender_chest then
+		junkCount = 0
+	end
+
 	local initialSlot = self._activeSlot
 	local chestSlot = self._chestSlot
 	if initialSlot < 0 then initialSlot = 1 end
 
 	for i = junkCount + 1, 16, 1 do
 		if self:IsSlotEmpty(i) or (mode == k_full_cleanup and self:RefuelFromSlot(i)) then
-			result = result + 1
+			if self._inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i then
+				result = result + 1
+			end
 		elseif mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
 			if self._inventoryMode == k_inventory_mode_drop_junk then
 				for j = 1, junkCount, 1 do
@@ -204,8 +210,11 @@ function TurtleDriver:ProcessInventory(mode)
 				end
 				if lastEmpty <= i then break end 
 			end
-		elseif self._inventoryMode == k_inventory_mode_ender_chest and not self:_detect() then
-			if self:SelectSlot(chestSlot) and self:_place() and self:_detect() then
+		elseif self._inventoryMode == k_inventory_mode_ender_chest then
+			if not self:IsSlotEmpty(chestSlot) then
+				self:DigForward()
+			end
+			if self:IsSlotEmpty(chestSlot) or (self:SelectSlot(chestSlot) and self:_place() and self:_detect()) then
 				for j = 1, 16, 1 do
 					if j ~= chestSlot and not self:IsSlotEmpty(j) and not self:DropSlot(j) then
 						break
