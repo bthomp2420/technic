@@ -302,6 +302,14 @@ function TurtleDriver:DigUp()
 	return false
 end
 
+function TurtleDriver:PlaceForward()
+	if not self:_detect() and self:_place() then
+		sleep(self._dropSleepTime)
+		return true
+	end
+	return false
+end
+
 function TurtleDriver:DigDown()
 	if self:_detectDown() and self:_digDown() then
 		sleep(self._digSleepTime)
