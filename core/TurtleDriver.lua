@@ -30,7 +30,7 @@ TurtleDriver = class("TurtleDriver",
 		drv._nextUpdate = 16
 		drv._emptySlots = 0
 		drv._activeSlot = -1
-		drv._junkCount = 4
+		drv._junkCount = 0
 		drv._chestSlot = 1
 
 		if not fs.isDir(".save") then
@@ -144,9 +144,14 @@ function TurtleDriver:CompareSlots(a, b)
 end
 
 function TurtleDriver:DropSlot(a, c)
-	if self:SlotHasItems(a) and self:SelectSlot(a) and self:_drop(c) then
-		sleep(self._dropSleepTime)
-		return (c or self:IsSlotEmpty(a))
+	if self:SlotHasItems(a) and self:SelectSlot(a) then
+		if c and self:_drop(c) then
+			sleep(self._dropSleepTime)
+			return self:IsSlotEmpty(a)
+		elseif self:_drop() then
+			sleep(self._dropSleepTime)
+			return self:IsSlotEmpty(a)
+		end
 	end
 	return false
 end
@@ -158,22 +163,20 @@ end
 function TurtleDriver:ProcessInventory(mode)
 	local result = 0
 
-	local junkCount = self._junkCount
-	if self._inventoryMode == k_inventory_mode_ender_chest then
-		junkCount = 0
-	end
+	local inventoryMode = self._inventoryMode
 
+	local junkCount = self._junkCount
 	local initialSlot = self._activeSlot
 	local chestSlot = self._chestSlot
 	if initialSlot < 0 then initialSlot = 1 end
 
 	for i = junkCount + 1, 16, 1 do
-		if self:IsSlotEmpty(i) or (mode == k_full_cleanup and self:RefuelFromSlot(i)) then
-			if self._inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i then
+		if self:IsSlotEmpty(i) or (mode == k_full_cleanup and chestSlot ~= i and self:RefuelFromSlot(i)) then
+			if inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i then
 				result = result + 1
 			end
 		elseif mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
-			if self._inventoryMode == k_inventory_mode_drop_junk then
+			if inventoryMode == k_inventory_mode_drop_junk then
 				for j = 1, junkCount, 1 do
 					if self:CompareSlots(i, j) then
 						if self:DropSlot(i) then
@@ -187,7 +190,7 @@ function TurtleDriver:ProcessInventory(mode)
 	end
 
 	if mode ~= k_no_cleanup then
-		if self._inventoryMode == k_inventory_mode_drop_junk then
+		if inventoryMode == k_inventory_mode_drop_junk then
 			for i = 1, junkCount, 1 do
 				 if (mode == k_full_cleanup or self:IsSlotFull(i)) then
 					local count = self:_getItemCount(i)
@@ -210,14 +213,15 @@ function TurtleDriver:ProcessInventory(mode)
 				end
 				if lastEmpty <= i then break end 
 			end
-		elseif self._inventoryMode == k_inventory_mode_ender_chest then
+		elseif inventoryMode == k_inventory_mode_ender_chest then
 			if not self:IsSlotEmpty(chestSlot) then
 				self:DigForward()
 			end
+			
 			if self:IsSlotEmpty(chestSlot) or (self:SelectSlot(chestSlot) and self:PlaceForward()) then
 				for i = 1, 16, 1 do
-					if i ~= chestSlot and not self:IsSlotEmpty(i) and not self:DropSlot(i) then
-						break
+					if i ~= chestSlot then
+						self:DropSlot(i)
 					end
 				end
 			end
@@ -229,7 +233,6 @@ function TurtleDriver:ProcessInventory(mode)
 	end
 	
 	self:SelectSlot(initialSlot)
-
 	return result
 end
 
