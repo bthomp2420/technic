@@ -19,15 +19,19 @@ TurtleExecutor = class("TurtleExecutor",
 TurtleHandler = class("TurtleHandler", function(o) end)
 
 function TurtleHandler:Run(executor, driver, desc)
+	
 end
 
 function TurtleHandler:Init(executor, driver)
+
 end
 
 function TurtleHandler:Startup(executor, driver)
+
 end
 
 function TurtleHandler:Handles(desc)
+
 end
 
 function TurtleExecutor:Push(desc)
@@ -97,10 +101,6 @@ function TurtleExecutor:AddHandler(handler)
 		result = true
 	end
 	return result
-end
-
-function TurtleExecutor:Handlers()
-	return self._handlers
 end
 
 function TurtleExecutor:Update(driver)
