@@ -235,8 +235,10 @@ function TurtleDriver:ProcessInventory(mode)
 		end
 	end
 
-	if self:IsSlotEmpty(chestSlot) and self:SelectSlot(chestSlot) then
-		self:DigForward()
+	if inventoryMode == k_inventory_mode_ender_chest then
+		if self:IsSlotEmpty(chestSlot) and self:SelectSlot(chestSlot) then
+			self:DigForward()
+		end
 	end
 	
 	self:SelectSlot(initialSlot)
