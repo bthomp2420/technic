@@ -6,6 +6,7 @@ local k_full_cleanup = 2
 
 local k_inventory_mode_drop_junk = 0
 local k_inventory_mode_ender_chest = 1
+local k_inventory_mode_manual = 2
 
 TurtleDriver = class("TurtleDriver",
 	function(drv, id)
@@ -26,12 +27,18 @@ TurtleDriver = class("TurtleDriver",
 		drv._turnSleepTime = 0.05
 		drv._attackSleepTime = 0.05
 
-		drv._inventoryMode = k_inventory_mode_ender_chest
+		drv._inventoryMode = k_inventory_mode_manual
 		drv._nextUpdate = 16
 		drv._emptySlots = 0
 		drv._activeSlot = -1
 		drv._junkCount = 0
-		drv._chestSlot = 1
+		drv._chestSlot = 0
+
+		if drv._inventoryMode == k_inventory_mode_drop_junk then
+			drv._junkCount = 4
+		else if drv._inventoryMode == k_inventory_mode_ender_chest then
+			drv._chestSlot = 1
+		end
 
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
@@ -262,7 +269,7 @@ function TurtleDriver:Update()
 		end
 	end
 	local fuelLevel = self:_getFuelLevel()
-	return fuelLevel == "unlimited" or fuelLevel > 0
+	return (fuelLevel == "unlimited" or fuelLevel > 0) and self._emptySlots ~= -1
 end
 
 function TurtleDriver:AttackForward()
