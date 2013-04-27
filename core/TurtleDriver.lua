@@ -36,7 +36,7 @@ TurtleDriver = class("TurtleDriver",
 
 		if drv._inventoryMode == k_inventory_mode_drop_junk then
 			drv._junkCount = 4
-		else if drv._inventoryMode == k_inventory_mode_ender_chest then
+		elseif drv._inventoryMode == k_inventory_mode_ender_chest then
 			drv._chestSlot = 1
 		end
 
