@@ -13,7 +13,7 @@ TurtleExecutor = class("TurtleExecutor",
 		--	os.setComputerLabel(o._computerId)
 		-- end
 
-		print("Turtle Id: " + o._computerId)
+		-- print("Turtle Id: " + o._computerId)
 
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
