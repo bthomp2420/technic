@@ -7,11 +7,11 @@ TurtleExecutor = class("TurtleExecutor",
 		o._handlers = { }
 		o._storedStackSize = 0
 
-		o._computerId = os.getComputerLabel()
-		if o._computerId == nil or o._computerId == "" then
-			o._computerId = "turtle-" + tostring(os.getComputer())
-			os.setComputerLabel(o._computerId)
-		end
+		-- o._computerId = os.getComputerLabel()
+		-- if o._computerId == nil or o._computerId == "" then
+		--	o._computerId = "turtle-" + tostring(os.getComputerId())
+		--	os.setComputerLabel(o._computerId)
+		-- end
 
 		print("Turtle Id: " + o._computerId)
 
