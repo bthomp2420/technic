@@ -55,7 +55,7 @@ function QuaryHandler:Run(executor, driver, desc)
 	-- advance to the next row
 	if x == xEnd then
 		if z == zEnd then
-			if y + 2 >= d then
+			if y + 1 >= d then
 				-- once we reach the last row in the last layer return false
 				-- to indicate that the quary program has finished
 				print("done")
@@ -91,12 +91,10 @@ function QuaryHandler:Run(executor, driver, desc)
 end
 
 function QuaryHandler:Init(executor, driver)
-	print ("Quary Initialized")
 end
 
 function QuaryHandler:Startup(executor, driver)
-	print ("Quary Starting")
-	self:Start(executor, driver, 16, 16, 16)
+	self:Start(executor, driver, 16, 16, 48)
 end
 
 function QuaryHandler:Handles(desc)

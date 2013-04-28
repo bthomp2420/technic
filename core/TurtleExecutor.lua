@@ -7,6 +7,14 @@ TurtleExecutor = class("TurtleExecutor",
 		o._handlers = { }
 		o._storedStackSize = 0
 
+		o._computerId = os.getComputerLabel()
+		if o._computerId == nil or o._computerId == "" then
+			o._computerId = "turtle-" + os.getComputerId()
+			os.setComputerLabel(o._computerId)
+		end
+
+		print("Turtle Id: " + o._computerId)
+
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
 		end
