@@ -1,8 +1,9 @@
 PRAGMA_ONCE()
 
 local k_no_cleanup = 0
-local k_partial_cleanup = 1
-local k_full_cleanup = 2
+local k_refuel_cleanup = 1
+local k_partial_cleanup = 2
+local k_full_cleanup = 3
 
 local k_inventory_mode_drop_junk = 0
 local k_inventory_mode_ender_chest = 1
@@ -178,7 +179,7 @@ function TurtleDriver:ProcessInventory(mode)
 	if initialSlot < 0 then initialSlot = 1 end
 
 	for i = junkCount + 1, 16, 1 do
-		if self:IsSlotEmpty(i) or (mode == k_full_cleanup and chestSlot ~= i and self:RefuelFromSlot(i)) then
+		if self:IsSlotEmpty(i) or (mode >= k_refuel_cleanup and chestSlot ~= i and self:RefuelFromSlot(i)) then
 			if inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i then
 				result = result + 1
 			end
@@ -211,7 +212,7 @@ function TurtleDriver:ProcessInventory(mode)
 			for i = junkCount + 1, 16, 1 do
 				if self:IsSlotEmpty(i) then
 					for j = lastEmpty - 1, i + 1, -1 do
-						if not self:IsSlotEmpty(j) and self:SelectSlot(j) then
+						if self:SelectSlot(j) then
 							self:_transferTo(i)
 							break
 						end
@@ -220,14 +221,16 @@ function TurtleDriver:ProcessInventory(mode)
 				end
 				if lastEmpty <= i then break end 
 			end
-		elseif inventoryMode == k_inventory_mode_ender_chest then
+		elseif inventoryMode == k_inventory_mode_ender_chest and mode == k_full_cleanup then
+			-- must dig forward to make sure we have a place to drop the ender chest
 			if not self:IsSlotEmpty(chestSlot) then
 				self:DigForward()
 			end
 			
-			if self:IsSlotEmpty(chestSlot) or (self:SelectSlot(chestSlot) and self:PlaceForward()) then
-				for i = 1, 16, 1 do
-					if i ~= chestSlot then
+			-- check all slots for items to drop in the ender chest
+			for i = 1, 16, 1 do
+				if i ~= chestSlot and not self:IsSlotEmpty(i) then
+					if self:IsSlotEmpty(chestSlot) or (self:SelectSlot(chestSlot) and self:PlaceForward()) then
 						self:DropSlot(i)
 					end
 				end
@@ -235,6 +238,8 @@ function TurtleDriver:ProcessInventory(mode)
 		end
 	end
 
+	-- big assumption of ender chest mode is that the chest slot is always either empty and the chest is infront of
+	-- the turtle, or it has a single ender chest...
 	if inventoryMode == k_inventory_mode_ender_chest then
 		if self:IsSlotEmpty(chestSlot) and self:SelectSlot(chestSlot) then
 			self:DigForward()
@@ -246,8 +251,8 @@ function TurtleDriver:ProcessInventory(mode)
 end
 
 function TurtleDriver:Update()
-	if self:_getFuelLevel() == 0 then
-		self._emptySlots = self:ProcessInventory(k_full_cleanup)
+	if self:_getFuelLevel() < 128 then
+		self._emptySlots = self:ProcessInventory(k_refuel_cleanup)
 		self._nextUpdate = 16
 	else
 		self._nextUpdate = self._nextUpdate - 1
