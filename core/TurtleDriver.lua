@@ -131,6 +131,8 @@ function TurtleDriver:Suck() return self:_suck() end
 function TurtleDriver:SuckUp() return self:_suckUp() end
 function TurtleDriver:SuckDown() return self:_suckDown() end
 
+function TurtleDriver:Drop(a) return self:_drop(a) end
+
 
 function TurtleDriver:SelectSlot(a)
 	if a > 0 and a <= 16 then
