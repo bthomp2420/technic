@@ -3,7 +3,7 @@ PRAGMA_ONCE()
 CraftHandler = class("CraftHandler", TurtleHandler, function (o) end)
 
 function CraftHandler:Startup(executor, driver)
-	self:Start(executor, driver)
+	-- self:Start(executor, driver)
 end
 
 function CraftHandler:Run(executor, driver, desc)
@@ -42,7 +42,7 @@ function CraftHandler:Start(executor, driver)
 
 	desc.type = "craft"
 	desc.slot = {}
-	
+
 	for i = 1, 15, 1 do
 
 		desc.slot[i] = driver:IsSlotEmpty(i) == false

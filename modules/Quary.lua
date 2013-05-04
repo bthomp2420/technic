@@ -3,7 +3,7 @@ PRAGMA_ONCE()
 QuaryHandler = class("QuaryHandler", TurtleHandler, function (o) end)
 
 function QuaryHandler:Startup(executor, driver)
-	-- self:Start(executor, driver, 16, 16, 48)
+	self:Start(executor, driver, 16, 16, 48)
 end
 
 function QuaryHandler:Run(executor, driver, desc)
