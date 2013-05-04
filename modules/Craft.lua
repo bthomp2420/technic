@@ -37,13 +37,13 @@ function CraftHandler:Handles(desc)
 	return desc.type == "craft"	
 end
 
-function CraftHandler:Start(executor, driver, w, h, d)
+function CraftHandler:Start(executor, driver)
 	local desc = {}
 
 	desc.type = "craft"
 
 	for i = 1, 15, 1 do
-		desc.slot[i] = not driver:IsSlotEmpty(i)
+		desc.slot[i] = ~driver:IsSlotEmpty(i)
 	end
 
 	executor:Push(desc)
