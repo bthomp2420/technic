@@ -86,6 +86,12 @@ function TurtleDriver:_down(...) return self.TurtleAPI.down(...) end
 function TurtleDriver:_turnLeft(...) return self.TurtleAPI.turnLeft(...) end
 function TurtleDriver:_turnRight(...) return self.TurtleAPI.turnRight(...) end
 
+function TurtleDriver:_craft(...) return self.TurtleAPI.craft(...) end
+function TurtleDriver:_suck(...) return self.TurtleAPI.suck(...) end
+function TurtleDriver:_suckUp(...) return self.TurtleAPI.suckUp(...) end
+function TurtleDriver:_suckDown(...) return self.TurtleAPI.suckDown(...) end
+
+
 function TurtleDriver:SavePosition()
 	return SaveTable(".save/driver_pos_"..self._id,
 	{
@@ -119,6 +125,12 @@ function TurtleDriver:GetY() return self._y end
 function TurtleDriver:GetZ() return self._z end
 function TurtleDriver:GetDx() return self._dx end
 function TurtleDriver:GetDz() return self._dz end
+
+function TurtleDriver:Craft(a) return self:_craft(a) end
+function TurtleDriver:Suck() return self:_suck() end
+function TurtleDriver:SuckUp() return self:_suckUp() end
+function TurtleDriver:SuckDown() return self:_suckDown() end
+
 
 function TurtleDriver:SelectSlot(a)
 	if a > 0 and a <= 16 then
