@@ -41,9 +41,11 @@ function CraftHandler:Start(executor, driver)
 	local desc = {}
 
 	desc.type = "craft"
-
+	desc.slot = {}
+	
 	for i = 1, 15, 1 do
-		desc.slot[i] = ~driver:IsSlotEmpty(i)
+
+		desc.slot[i] = driver:IsSlotEmpty(i) == false
 	end
 
 	executor:Push(desc)
