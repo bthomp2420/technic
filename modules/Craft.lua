@@ -16,7 +16,9 @@ function CraftHandler:Run(executor, driver, desc)
 	for i = 1, 15, 1 do
 		if desc.slot[i] and driver:IsSlotEmpty(i) then
 			driver:SelectSlot(i)
-			driver:SuckUp() or driver:SuckDown()
+			if not driver:SuckUp() then
+				driver:SuckDown()
+			end
 			return true
 		end
 	end
