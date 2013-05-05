@@ -28,7 +28,7 @@ TurtleDriver = class("TurtleDriver",
 		drv._turnSleepTime = 0.05
 		drv._attackSleepTime = 0.05
 
-		drv._inventoryMode = k_inventory_mode_ender_chest
+		drv._inventoryMode = k_inventory_mode_manual
 		drv._nextUpdate = 16
 		drv._emptySlots = 0
 		drv._activeSlot = -1
