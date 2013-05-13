@@ -24,7 +24,7 @@ function LoadConfig(file, d)
 		elseif dType == "function" then
 			r = d()
 			if r ~= nil and type(r) == "table" then
-				return SaveTable(file, r)
+				SaveTable(file, r)
 			else
 				r = nil
 			end
