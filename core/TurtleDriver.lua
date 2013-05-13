@@ -15,8 +15,8 @@ TurtleDriver = class("TurtleDriver",
 		
 		local config = LoadConfig("config/turtle.cfg.lua",
 		{
-			["mode_description"] = "k_inventory_mode_manual = 0, k_inventory_mode_ender_chest = 1, k_inventory_mode_manual = 2",
-			["mode"] = k_inventory_mode_manual
+			["description"] = "k_inventory_mode_manual = 0, k_inventory_mode_ender_chest = 1, k_inventory_mode_manual = 2",
+			["mode"] = k_inventory_mode_manual,
 		})
 		drv._config = config
 
@@ -35,7 +35,8 @@ TurtleDriver = class("TurtleDriver",
 		drv._turnSleepTime = 0.05
 		drv._attackSleepTime = 0.05
 
-		drv._inventoryMode = k_inventory_mode_manual
+		-- default is manual mode but can be changed in the config file
+		drv._inventoryMode = config["mode"]
 		drv._nextUpdate = 16
 		drv._emptySlots = 0
 		drv._activeSlot = -1

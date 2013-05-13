@@ -26,6 +26,11 @@ function LoadConfig(file, d)
 		end
 
 		if r ~= nil and type(r) == "table" then
+			local fname = fs.getName(file)
+			if strlen(fname) + 1 < strlen(file) then
+				local dir = strsub(file, 1, strlen(file) - strlen(fname) - 1)
+				fs.makeDir(strlower(dir))
+			end
 			SaveTable(file, r)
 		else
 			r = nil
