@@ -10,6 +10,34 @@ function PRAGMA_ONCE()
 	error(__pragma_once)
 end
 
+function LoadConfig(file, d)
+	local r = nil
+	local f, e = loadfile(file)
+	if f ~= nil then
+		r = f()
+	end
+
+	if r == nil and d ~= nil then
+		local dType = type(d)
+		if dType == "table" then
+			r = d
+		elseif dType == "function" then
+			r = d()
+			if r ~= nil and type(r) == "table" then
+				return SaveTable(file, r)
+			else
+				r = nil
+			end
+		end
+	end
+
+	if r == nil then
+		r = { }
+	end
+
+	return r
+end
+
 function Include(file)
 	local result
 	if fs.exists(file) then

@@ -13,6 +13,13 @@ TurtleDriver = class("TurtleDriver",
 	function(drv, id)
 		if not id then id = "default" end
 		
+		local config = LoadConfig("config/turtle.cfg.lua",
+		{
+			["mode_description"] = "k_inventory_mode_manual = 0, k_inventory_mode_ender_chest = 1, k_inventory_mode_manual = 2",
+			["mode"] = k_inventory_mode_manual
+		})
+		drv._config = config
+
 		drv._id = id
 		drv._x = 0
 		drv._y = 0
@@ -193,10 +200,10 @@ function TurtleDriver:ProcessInventory(mode)
 	if initialSlot < 0 then initialSlot = 1 end
 
 	for i = junkCount + 1, 16, 1 do
-		if self:IsSlotEmpty(i) or (mode >= k_refuel_cleanup and chestSlot ~= i and self:RefuelFromSlot(i)) then
-			if inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i then
-				result = result + 1
-			end
+		if self:IsSlotEmpty(i) and (inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i) then
+			result = result + 1
+		elseif mode >= k_refuel_cleanup and chestSlot ~= i and self:_getFuelLevel() < 1024 and self:RefuelFromSlot(i) then
+			result = result + 1
 		elseif mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
 			if inventoryMode == k_inventory_mode_drop_junk then
 				for j = 1, junkCount, 1 do
@@ -221,20 +228,6 @@ function TurtleDriver:ProcessInventory(mode)
 					end
 				end
 			end
-
-			local lastEmpty = 17
-			for i = junkCount + 1, 16, 1 do
-				if self:IsSlotEmpty(i) then
-					for j = lastEmpty - 1, i + 1, -1 do
-						if self:SelectSlot(j) then
-							self:_transferTo(i)
-							break
-						end
-						lastEmpty = j
-					end
-				end
-				if lastEmpty <= i then break end 
-			end
 		elseif inventoryMode == k_inventory_mode_ender_chest and mode == k_full_cleanup then
 			-- must dig forward to make sure we have a place to drop the ender chest
 			if not self:IsSlotEmpty(chestSlot) then
@@ -249,6 +242,20 @@ function TurtleDriver:ProcessInventory(mode)
 					end
 				end
 			end
+		end
+
+		local lastEmpty = 17
+		for i = junkCount + 1, 16, 1 do
+			if self:IsSlotEmpty(i) and (inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i) then
+				for j = lastEmpty - 1, i + 1, -1 do
+					if self:SelectSlot(j) and (inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= j) then
+						self:_transferTo(i)
+						break
+					end
+					lastEmpty = j
+				end
+			end
+			if lastEmpty <= i then break end 
 		end
 	end
 

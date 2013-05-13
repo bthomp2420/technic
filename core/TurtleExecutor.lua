@@ -7,13 +7,13 @@ TurtleExecutor = class("TurtleExecutor",
 		o._handlers = { }
 		o._storedStackSize = 0
 
-		-- o._computerId = os.getComputerLabel()
-		-- if o._computerId == nil or o._computerId == "" then
-		--	o._computerId = "turtle-" + tostring(os.getComputerId())
-		--	os.setComputerLabel(o._computerId)
-		-- end
+		o._computerId = os.getComputerLabel()
+		if o._computerId == nil or o._computerId == "" then
+			o._computerId = ("turtle-%d"):format(os.getComputerId())
+			os.setComputerLabel(o._computerId)
+		end
 
-		-- print("Turtle Id: " + o._computerId)
+		print(("Computer Id: %s"):format(o._computerId))
 
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
@@ -26,21 +26,11 @@ TurtleExecutor = class("TurtleExecutor",
 
 TurtleHandler = class("TurtleHandler", function(o) end)
 
-function TurtleHandler:Run(executor, driver, desc)
-	
-end
-
-function TurtleHandler:Init(executor, driver)
-
-end
-
-function TurtleHandler:Startup(executor, driver)
-
-end
-
-function TurtleHandler:Handles(desc)
-
-end
+function TurtleHandler:Run(executor, driver, desc) end
+function TurtleHandler:Init(executor, driver) end
+function TurtleHandler:Startup(executor, driver) end
+function TurtleHandler:Handles(desc) end
+function TurtleHandler:Handle(packet) end
 
 function TurtleExecutor:Push(desc)
 	for i, handler in ipairs(self._handlers) do

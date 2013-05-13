@@ -3,7 +3,17 @@ PRAGMA_ONCE()
 QuaryHandler = class("QuaryHandler", TurtleHandler, function (o) end)
 
 function QuaryHandler:Startup(executor, driver)
-	self:Start(executor, driver, 16, 16, 48)
+	local config = LoadConfig("config/quary.cfg.lua",
+		{
+			["autostart"] = false,
+			["width"] = 16,
+			["height"] = 16,
+			["depth"] = 16
+		})
+	if (config["autostart"]) then
+		self:Start(executor, driver, config["width"], config["height"], config["depth"])
+	end
+	self._config = config
 end
 
 function QuaryHandler:Run(executor, driver, desc)
