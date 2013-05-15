@@ -10,9 +10,6 @@ function QuaryHandler:Startup(executor, driver)
 			["height"] = 16,
 			["depth"] = 16
 		})
-	if (config["autostart"]) then
-		self:Start(executor, driver, config["width"], config["height"], config["depth"])
-	end
 	self._config = config
 end
 
@@ -105,6 +102,10 @@ function QuaryHandler:Run(executor, driver, desc)
 end
 
 function QuaryHandler:Init(executor, driver)
+	local config = self._config
+	if (config["autostart"]) then
+		self:Start(executor, driver, config["width"], config["height"], config["depth"])
+	end
 end
 
 function QuaryHandler:Handles(desc)
