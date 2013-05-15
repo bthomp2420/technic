@@ -404,7 +404,7 @@ function TurtleDriver:MoveForward()
 	local x = d._x + dx
 	local y = d._y
 	local z = d._z + dz
-	return _doMoveOperation(x, y, z, dx, dz, function() return d:_forward() end)
+	return d:_doMoveOperation(x, y, z, dx, dz, function() return d:_forward() end)
 end
 
 function TurtleDriver:MoveBackward()
@@ -415,7 +415,7 @@ function TurtleDriver:MoveBackward()
 	local x = d._x - dx
 	local y = d._y
 	local z = d._z - dz
-	return _doMoveOperation(x, y, z, dx, dz, function() return d:_back() end)
+	return d:_doMoveOperation(x, y, z, dx, dz, function() return d:_back() end)
 end
 
 function TurtleDriver:MoveUp()
@@ -426,7 +426,7 @@ function TurtleDriver:MoveUp()
 	local x = d._x
 	local y = d._y + 1
 	local z = d._z
-	return _doMoveOperation(x, y, z, dx, dz, function() return d:_up() end)
+	return d:_doMoveOperation(x, y, z, dx, dz, function() return d:_up() end)
 end
 
 function TurtleDriver:MoveDown()
@@ -437,7 +437,7 @@ function TurtleDriver:MoveDown()
 	local x = d._x
 	local y = d._y - 1
 	local z = d._z
-	return _doMoveOperation(x, y, z, dx, dz, function() return d:_down() end)
+	return d:_doMoveOperation(x, y, z, dx, dz, function() return d:_down() end)
 end
 
 function TurtleDriver:TurnLeft()
@@ -448,7 +448,7 @@ function TurtleDriver:TurnLeft()
 	local x = d._x
 	local y = d._y
 	local z = d._z
-	return _doMoveOperation(x, y, z, dx, dz, function() return d:_turnLeft() end)
+	return d:_doMoveOperation(x, y, z, dx, dz, function() return d:_turnLeft() end)
 end
 
 function TurtleDriver:TurnRight()
@@ -459,7 +459,7 @@ function TurtleDriver:TurnRight()
 	local x = d._x
 	local y = d._y
 	local z = d._z
-	return _doMoveOperation(x, y, z, dx, dz, function() return d:_turnRight() end)
+	return d:_doMoveOperation(x, y, z, dx, dz, function() return d:_turnRight() end)
 end
 
 function TurtleDriver:MineForward()
