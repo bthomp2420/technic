@@ -99,6 +99,32 @@ function TurtleDriver:_suck(...) return self.TurtleAPI.suck(...) end
 function TurtleDriver:_suckUp(...) return self.TurtleAPI.suckUp(...) end
 function TurtleDriver:_suckDown(...) return self.TurtleAPI.suckDown(...) end
 
+function TurtleDriver:_beginSavePosition(x, y, z, dx, dz)
+	local saveTransaction = BeginSaveTable(".save/driver_pos_"..self._id,
+	{
+		["x"] = x,
+		["y"] = y,
+		["z"] = z,
+		["dx"] = dx,
+		["dz"] = dz,
+	})
+	
+	if saveTransaction == false then
+		return false
+	end
+
+	local d = self
+	return function(cancel)
+		local result = saveTransaction(cancel)
+		if result then
+			d._x = x
+			d._y = y
+			d._z = z
+			d._dx = dx
+			d._dz = dz
+		end
+	end
+end
 
 function TurtleDriver:SavePosition()
 	return SaveTable(".save/driver_pos_"..self._id,
@@ -357,66 +383,73 @@ function TurtleDriver:DigDown()
 	return false
 end
 
-function TurtleDriver:MoveForward()
-	if self:Update() and self:_forward() then
-		self._x = self._x + self._dx
-		self._z = self._z + self._dz
-		self:SavePosition()
-		sleep(self._moveSleepTime)
-		return true
+function TurtleDriver:_doMoveOperation(x, y, z, dx, dz, op)
+	if self:Update() then
+		local t = self:_beginSavePosition(x, self._y, z, self._dx, self._dz)
+		if t ~= false then
+			local success = op()
+			t(success == false)
+			if success then
+				sleep(self._moveSleepTime)
+			end
+			return success
+		end
 	end
 	return false
+end
+
+function TurtleDriver:MoveForward()
+	local dx = self._dx
+	local dz = self._dz
+	local x = self._x + dx
+	local y = self._y
+	local z = self._z + dz
+	return _doMoveOperation(x, y, z, dx, dz, self:_back)
 end
 
 function TurtleDriver:MoveBackward()
-	if self:Update() and self:_back() then
-		self._x = self._x - self._dx
-		self._z = self._z - self._dz
-		self:SavePosition()
-		sleep(self._moveSleepTime)
-		return true
-	end
-	return false
+	local dx = self._dx
+	local dz = self._dz
+	local x = self._x - dx
+	local y = self._y
+	local z = self._z - dz
+	return _doMoveOperation(x, y, z, dx, dz, self:_back)
 end
 
 function TurtleDriver:MoveUp()
-	if self:Update() and self:_up() then
-		self._y = self._y + 1
-		self:SavePosition()
-		sleep(self._moveSleepTime)
-		return true
-	end
-	return false
+	local dx = self._dx
+	local dz = self._dz
+	local x = self._x
+	local y = self._y + 1
+	local z = self._z
+	return _doMoveOperation(x, y, z, dx, dz, self:_up)
 end
 
 function TurtleDriver:MoveDown()
-	if self:Update() and self:_down() then
-		self._y = self._y - 1
-		self:SavePosition()
-		sleep(self._moveSleepTime)
-		return true
-	end
-	return false
+	local dx = self._dx
+	local dz = self._dz
+	local x = self._x
+	local y = self._y - 1
+	local z = self._z
+	return _doMoveOperation(x, y, z, dx, dz, self:_down)
 end
 
 function TurtleDriver:TurnLeft()
-	if self:_turnLeft() then
-		self._dx, self._dz = -self._dz, self._dx
-		self:SavePosition()
-		sleep(self._turnSleepTime)
-		return true
-	end
-	return false
+	local dx = -self._dz
+	local dz = self._dx
+	local x = self._x
+	local y = self._y
+	local z = self._z
+	return _doMoveOperation(x, y, z, dx, dz, self:_turnLeft)
 end
 
 function TurtleDriver:TurnRight()
-	if self:_turnRight() then
-		self._dx, self._dz = self._dz, -self._dx
-		self:SavePosition()
-		sleep(self._turnSleepTime)
-		return true
-	end
-	return false
+	local dx = self._dz
+	local dz = -self._dx
+	local x = self._x
+	local y = self._y
+	local z = self._z
+	return _doMoveOperation(x, y, z, dx, dz, self:_turnRight)
 end
 
 function TurtleDriver:MineForward()
