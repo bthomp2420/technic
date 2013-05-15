@@ -3,14 +3,11 @@ PRAGMA_ONCE()
 CraftHandler = class("CraftHandler", TurtleHandler, function (o) end)
 
 function CraftHandler:Startup(executor, driver)
-	local config = LoadConfig("config/craft.cfg.lua",
-		{
-			["autostart"] = false,
-		})
-	if (config["autostart"]) then
+	local c = self._config
+	if (c["autostart"]) then
 		self:Start(executor, driver)
 	end
-	self._config = config
+
 end
 
 function CraftHandler:Run(executor, driver, desc)
@@ -38,6 +35,11 @@ function CraftHandler:Run(executor, driver, desc)
 end
 
 function CraftHandler:Init(executor, driver)
+	local config = LoadConfig("config/craft.cfg.lua",
+		{
+			["autostart"] = false,
+		})
+	self._config = config
 end
 
 function CraftHandler:Handles(desc)
