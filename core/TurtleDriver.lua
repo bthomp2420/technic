@@ -100,7 +100,7 @@ function TurtleDriver:_suckUp(...) return self.TurtleAPI.suckUp(...) end
 function TurtleDriver:_suckDown(...) return self.TurtleAPI.suckDown(...) end
 
 function TurtleDriver:_beginSavePosition(x, y, z, dx, dz)
-	local saveTransaction = BeginSaveTable(".save/driver_pos_"..self._id,
+	local t = BeginSaveTable(".save/driver_pos_"..self._id,
 	{
 		["x"] = x,
 		["y"] = y,
@@ -108,15 +108,14 @@ function TurtleDriver:_beginSavePosition(x, y, z, dx, dz)
 		["dx"] = dx,
 		["dz"] = dz,
 	})
-	
-	if saveTransaction == false then
+
+	if t == false then
 		return false
 	end
 
 	local d = self
-	return function(cancel)
-		local result = saveTransaction(cancel)
-		if result then
+	return function(c)
+		if t(c) then
 			d._x = x
 			d._y = y
 			d._z = z
@@ -385,71 +384,82 @@ end
 
 function TurtleDriver:_doMoveOperation(x, y, z, dx, dz, op)
 	if self:Update() then
-		local t = self:_beginSavePosition(x, self._y, z, self._dx, self._dz)
+		local t = self:_beginSavePosition(x, y, z, dx, dz)
 		if t ~= false then
-			local success = op()
-			t(success == false)
-			if success then
+			local s = op()
+			if t(s == false) then
 				sleep(self._moveSleepTime)
 			end
-			return success
+			return s
 		end
 	end
 	return false
 end
 
 function TurtleDriver:MoveForward()
-	local dx = self._dx
-	local dz = self._dz
-	local x = self._x + dx
-	local y = self._y
-	local z = self._z + dz
-	return _doMoveOperation(x, y, z, dx, dz, self:_back)
+	local d = self
+
+	local dx = d._dx
+	local dz = d._dz
+	local x = d._x + dx
+	local y = d._y
+	local z = d._z + dz
+	return _doMoveOperation(x, y, z, dx, dz, function() return d:_forward() end)
 end
 
 function TurtleDriver:MoveBackward()
-	local dx = self._dx
-	local dz = self._dz
-	local x = self._x - dx
-	local y = self._y
-	local z = self._z - dz
-	return _doMoveOperation(x, y, z, dx, dz, self:_back)
+	local d = self
+
+	local dx = d._dx
+	local dz = d._dz
+	local x = d._x - dx
+	local y = d._y
+	local z = d._z - dz
+	return _doMoveOperation(x, y, z, dx, dz, function() return d:_back() end)
 end
 
 function TurtleDriver:MoveUp()
-	local dx = self._dx
-	local dz = self._dz
-	local x = self._x
-	local y = self._y + 1
-	local z = self._z
-	return _doMoveOperation(x, y, z, dx, dz, self:_up)
+	local d = self
+
+	local dx = d._dx
+	local dz = d._dz
+	local x = d._x
+	local y = d._y + 1
+	local z = d._z
+	return _doMoveOperation(x, y, z, dx, dz, function() return d:_up() end)
 end
 
 function TurtleDriver:MoveDown()
-	local dx = self._dx
-	local dz = self._dz
-	local x = self._x
-	local y = self._y - 1
-	local z = self._z
-	return _doMoveOperation(x, y, z, dx, dz, self:_down)
+	local d = self
+
+	local dx = d._dx
+	local dz = d._dz
+	local x = d._x
+	local y = d._y - 1
+	local z = d._z
+	return _doMoveOperation(x, y, z, dx, dz, function() return d:_down() end)
 end
 
 function TurtleDriver:TurnLeft()
-	local dx = -self._dz
-	local dz = self._dx
-	local x = self._x
-	local y = self._y
-	local z = self._z
-	return _doMoveOperation(x, y, z, dx, dz, self:_turnLeft)
+	local d = self
+
+	local dx = -d._dz
+	local dz = d._dx
+	local x = d._x
+	local y = d._y
+	local z = d._z
+	return _doMoveOperation(x, y, z, dx, dz, function() return d:_turnLeft() end)
 end
 
 function TurtleDriver:TurnRight()
-	local dx = self._dz
-	local dz = -self._dx
-	local x = self._x
-	local y = self._y
-	local z = self._z
-	return _doMoveOperation(x, y, z, dx, dz, self:_turnRight)
+	local d = self
+
+	local dx = d._dz
+	local dz = -d._dx
+	local x = d._x
+	local y = d._y
+	local z = d._z
+	return _doMoveOperation(x, y, z, dx, dz, function() return d:_turnRight() end)
 end
 
 function TurtleDriver:MineForward()
