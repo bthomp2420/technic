@@ -10,6 +10,21 @@ function PRAGMA_ONCE()
 	error(__pragma_once)
 end
 
+function EnsureDirectory(file)
+	if file == nil or type(file) ~= "string" then
+		return false
+	end
+
+	local fileLen = strlen(file)
+	local fname = fs.getName(file)
+	local fnameLen = strlen(fname) + 1
+	if fnameLen < fileLen then
+		return fs.makeDir(strlower(strsub(file, 1, fileLen - fnameLen)))
+	end
+
+	return true
+end
+
 function LoadConfig(file, d)
 	local r = nil
 	local f, e = loadfile(file)
@@ -26,11 +41,7 @@ function LoadConfig(file, d)
 		end
 
 		if r ~= nil and type(r) == "table" then
-			local fname = fs.getName(file)
-			if strlen(fname) + 1 < strlen(file) then
-				local dir = strsub(file, 1, strlen(file) - strlen(fname) - 1)
-				fs.makeDir(strlower(dir))
-			end
+			EnsureDirectory(file)
 			SaveTable(file, r)
 		else
 			r = nil
