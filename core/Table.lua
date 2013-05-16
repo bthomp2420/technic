@@ -1,35 +1,37 @@
 PRAGMA_ONCE()
 
 function BeginSaveTable(file, t)
-	local oldData
-	local data = serialize(t)
+	-- read on the old data and save it in a buffer
+	local fileBak = file..".bak"
+	fs.delete(fileBak)
+
+	-- if the file already exists copy it
 	if fs.exists(file) then
-		local f = fs.open(file, "r")
-		if f ~= nil then
-			oldData = f.readAll()
-			f.close()
-		end
+		fs.copy(file, fileBak)
 	end
+
+	-- write out the new data and then return a completion function
 	local f = fs.open(file, "w")
 	if f ~= nil then
+		local data = serialize(t)
 		f.write(data)
-		return function(cancel)
-			f.close()
+		f.close()
+
+		return function(cancel)	
 			if cancel then
-				if oldData ~= nil then
-					local f2 = fs.open(file, "w")
-					if f2 ~= nil then
-						f2.write(oldData)
-						f2.close()
-					end
-				else
-					fs.delete(file)
+				fs.delete(file)
+				if fs.exists(fileBak) then
+					fs.move(fileBak, file)
 				end
+				return false
+			else
+				fs.delete(fileBak)
+				return true
 			end
-			return cancel == false
 		end
 	end
-	return function(cancel) return false end
+
+	return false
 end
 
 function SaveTable(file, t)
