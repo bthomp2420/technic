@@ -5,6 +5,7 @@ QuaryHandler = class("QuaryHandler", TurtleHandler, function (o) end)
 function QuaryHandler:Startup(executor, driver)
 	local c = self._config
 	if c["autostart"] then
+		Message("Quary: auto-start")
 		self:Start(executor, driver, c["width"], c["height"], c["depth"])
 	end
 end
@@ -31,7 +32,7 @@ function QuaryHandler:Run(executor, driver, desc)
 
 	-- double check our depth to make sure that the depth hasn't been overshot
 	if y < 0 or y >= d then
-		print("error")
+		Critical("Quary: y is out-of-range [0,%d): %d", d, y)
 		return false
 	end
 
@@ -65,7 +66,7 @@ function QuaryHandler:Run(executor, driver, desc)
 			if y + 1 >= d then
 				-- once we reach the last row in the last layer return false
 				-- to indicate that the quary program has finished
-				print("done")
+				Message("Quary: done")
 				executor:Pop()
 				return true
 			end
@@ -86,10 +87,10 @@ function QuaryHandler:Run(executor, driver, desc)
 			driver:MineForward()
 		else
 			-- something bad happened and we are going out of bounds
-			print("error: stepQuary failed to determine next step based on current turtle state")
-			print(string.format("x, z, y [dx, dz] = %d, %d, %d [%d, %d]", x, z, y, dx, dz))
-			print(string.format("xEnd, zEnd, yEnd = %d, %d, %d", xEnd, zEnd, yEnd))
-			print(string.format("layer, layerFactor, xDirection = %d, %d, %d", layer, layerFactor, xDirection))
+			Critical("Quary error: stepQuary failed to determine next step based on current turtle state")
+			Critical("x, z, y [dx, dz] = %d, %d, %d [%d, %d]", x, z, y, dx, dz)
+			Critical("xEnd, zEnd, yEnd = %d, %d, %d", xEnd, zEnd, yEnd)
+			Critical("layer, layerFactor, xDirection = %d, %d, %d", layer, layerFactor, xDirection)
 			return false
 		end
 	end

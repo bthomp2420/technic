@@ -14,15 +14,15 @@ local function init_instrument_api()
 					__isUnwindingStack = true
 
 					if err then
-						print(("Error: %s"):format(tostring(err)))
+						Critical("Error: %s", tostring(err))
 					else
-						print("Error: ???")
+						Critical("Error: ???")
 					end
 
-					print(("--> %s"):format(fname))
+					Critical("--> %s", fname)
 					error(err or "???")
 				else
-					print((" in %s"):format(fname))
+					Critical(" in %s", fname)
 					error(err or "???")
 				end
 			end

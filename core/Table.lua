@@ -48,6 +48,8 @@ end
 function LoadTable(file)
 	local result
 	if fs.exists(file) then
+		Assert(not fs.exists(file..".bak"), "Saved data is in inconsistent state due to incomplete transaction: %s", file)
+
 		local f = fs.open(file, "r")
 		if f ~= nil then
 			local fd = f.readAll()

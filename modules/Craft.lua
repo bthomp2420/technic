@@ -5,9 +5,9 @@ CraftHandler = class("CraftHandler", TurtleHandler, function (o) end)
 function CraftHandler:Startup(executor, driver)
 	local c = self._config
 	if (c["autostart"]) then
+		Message("Craft: auto-start")
 		self:Start(executor, driver)
 	end
-
 end
 
 function CraftHandler:Run(executor, driver, desc)

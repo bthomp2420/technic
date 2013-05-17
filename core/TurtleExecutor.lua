@@ -13,7 +13,7 @@ TurtleExecutor = class("TurtleExecutor",
 			os.setComputerLabel(o._computerId)
 		end
 
-		print(("Computer Id: %s"):format(o._computerId))
+		Message("Computer Id: %s", o._computerId)
 
 		if not fs.isDir(".save") then
 			fs.makeDir(".save")
@@ -75,7 +75,7 @@ function TurtleExecutor:Resume()
 	local result = false
 	local files = fs.list(".save/stack")
 	if #files > 0 then
-		print("Resuming...")
+		Message("Resuming...")
 		local function compare(a, b)
 			return tonumber(a) < tonumber(b)
 		end
@@ -111,9 +111,7 @@ function TurtleExecutor:Update(driver)
 		
 		if desc ~= nil then
 			local success, err = pcall(function() result = handler:Run(exec, driver, desc) end)
-			if not success then
-				print(err)
-			end
+			Assert(success, "Unhandled error caught: %s", tostring(err))
 		end
 		
 		if not result then
@@ -127,13 +125,13 @@ function TurtleExecutor:Update(driver)
 end
 
 function TurtleExecutor:Run(driver)
-	print("TurtleExecutor: Initializing...")
+	Message("TurtleExecutor: Initializing...")
 	for i, handler in ipairs(self._handlers) do
 		handler:Init(self, driver)
 	end
 
 	if not self:Resume() then
-		print("TurtleExecutor: Starting...")
+		Message("TurtleExecutor: Starting...")
 		for i, handler in ipairs(self._handlers) do
 			handler:Startup(self, driver)
 		end
@@ -143,11 +141,8 @@ function TurtleExecutor:Run(driver)
 	local exec = self
 	while true do
 		local success, err = pcall(function() exec:Update(driver) end)
-		if not success then
-			print(("Unhandled error caught: %s"):format(err))
-			break
-		end
+		Assert(success, "Unhandled error caught: %s", tostring(err))
 	end
 
-	print("TurtleExecutor: Shutting down...")
+	Message("TurtleExecutor: Shutting down...")
 end

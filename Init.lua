@@ -6,8 +6,102 @@ local __include_stack = { __FILE__ }
 
 __pragma_once[__FILE__] = true
 function PRAGMA_ONCE()
-	if not __pragma_once[__FILE__] then return end
+	if not __pragma_once[__FILE__] then
+		__pragma_once[__FILE__] = true
+		return
+	end
 	error(__pragma_once)
+end
+
+local __session_start_time = os.clock()
+local __session_id = math.floor(__session_start_time)
+local __log_file_path = ("log_session_%d"):format(__session_id)
+local __log_disk_full = false
+
+local k_level_assert = -1
+local k_level_message = 0
+local k_level_critical = 1
+local k_level_error = 2
+local k_level_warning = 3
+local k_level_info = 4
+local k_level_verbose = 10
+
+local __log_level_console = k_level_critical
+local __log_level_file = k_level_error
+
+function Log(level, f, ...)
+	if level > __log_level_file and level > __log_level_console) then
+		return
+	end
+
+	if (type(f) ~= "string")
+		Log(k_level_error, "Invalid format string provided.")
+		return
+	end
+
+	local msg
+	local args = { ... }
+	local success, err = pcall(function() msg = f:format(unpack(args)) end)
+	if not success then
+		if err ~= nil then
+			Log(k_level_error, "Error with format string: %s", tostring(err))
+		else
+			Log(k_level_error, "Error with format string.")
+		end
+		return
+	end
+
+	local ts = textutils.formatTime(os.time(), false)
+	local output = ("[%s] %s"):format(ts, msg)
+
+	if level <= __log_level_file then
+		local remaining = fs.getFreeSpace(__log_file_path)
+		local len = strlen(output)
+		if remaining < len + 128 and not __log_disk_full then
+			local diskFullMessage = ("[%s] disk full"):format(ts)
+			if remaining > 128 then	
+				local f = fs.open(__log_file_path, "a")
+				if f ~= nil then
+					f.write(diskFullMessage)
+					f.write("\n")
+					f.close()
+				end
+			end
+			print(diskFullMessage)
+			__log_disk_full = true
+		else
+			__log_disk_full = false
+		end
+	end
+
+	if level <= __log_level_file and not __log_disk_full then
+		local f = fs.open(__log_file_path, "a")
+		if f ~= nil then
+			f.write(output)
+			f.write("\n")
+			f.close()
+		end
+	end
+
+	if level <= __log_level_console then
+		print(output)
+	end
+
+	if level == k_level_assert then
+		error(output)
+	end
+end
+
+function Message(f, ...) Log(k_level_message, f, ...) end
+function Critical(f, ...) Log(k_level_critical, f, ...) end
+function Error(f, ...) Log(k_level_error, f, ...) end
+function Warning(f, ...) Log(k_level_warning, f, ...) end
+function Info(f, ...) Log(k_level_info, f, ...) end
+function Verbose(f, ...) Log(k_level_verbose, f, ...) end
+function Assert(condition, f, ...)
+	if condition == false then
+		Log(k_level_assert, f, ...)
+	end
 end
 
 function EnsureDirectory(file)
@@ -57,6 +151,7 @@ end
 
 function Include(file)
 	local result
+	local included = false
 	if fs.exists(file) then
 		local f = fs.open(file, "r")
 		if f ~= nil then
@@ -68,33 +163,35 @@ function Include(file)
 				table.insert(__include_stack, file)
 				__FILE__ = __include_stack[#__include_stack]
 				
-				print(("+ %s"):format(file))
+				Message("+ %s", file)
 				local success, err = pcall(function() result = setfenv(chunk, context)() or true end)
 				if not success then
 					if not rawequal(err, __pragma_once) then
-						print(("Failed to include %s: %s"):format(file, err))
+						Error("Failed to include %s: %s", file, err)
 					else
 						result = __pragma_once[__FILE__]
+						included = true
 					end
 				else
-					__pragma_once[__FILE__] = result
+					if __pragma_once[__FILE__] then
+						__pragma_once[__FILE__] = result
+					end
+					included = true
 				end
 
 				table.remove(__include_stack, #__include_stack)
 				__FILE__ = __include_stack[#__include_stack]
 			else
-				print(("Failed to load %s..."):format(file))
+				Error("Failed to load %s...", file)
 			end
 		end
 	end
-	return result
+	return result, included
 end
 
 function Require(file)
-	local result = Include(file)
-	if not result then
-		error(-1)
-	end
+	local result, success = Include(file)
+	Assert(success, "Failed to include file: %s", file)
 	return result
 end
 
@@ -105,14 +202,13 @@ Require("core/Table.lua")
 
 Require("core/TurtleDriver.lua")
 local driver = TurtleDriver()
-driver:LoadPosition()
 
 Require("core/TurtleExecutor.lua")
 local executor = TurtleExecutor()
 for i, file in ipairs(fs.list("modules")) do
 	local result = Include(fs.combine("modules", file))
 	if executor:AddHandler(result) then
-		print(string.format("Loading Module %s", file))
+		Message("Loading Module %s", file)
 	end
 end
 

@@ -25,17 +25,19 @@ TurtleDriver = class("TurtleDriver",
 		drv._y = 0
 		drv._z = 0
 		drv._dx = 1
-		drv._dz = 0   
+		drv._dz = 0
+
+		if drv:_restorePosition() then
+			Message("Restored position: (%d, %d, %d, %d, %d)", drv._x, drv._y, drv._z, drv._dx, drv._dz)
+		end
 
 		drv._selectSleepTime = 0.05
 		drv._dropSleepTime = 0.05
 		drv._retrySleepTime = 0.2
 		drv._moveSleepTime = 0.2
 		drv._digSleepTime = 0.05
-		drv._turnSleepTime = 0.05
 		drv._attackSleepTime = 0.05
 
-		-- default is manual mode but can be changed in the config file
 		drv._inventoryMode = config["mode"]
 		drv._nextUpdate = 16
 		drv._emptySlots = 0
@@ -49,9 +51,8 @@ TurtleDriver = class("TurtleDriver",
 			drv._chestSlot = 1
 		end
 
-		if not fs.isDir(".save") then
-			fs.makeDir(".save")
-		end
+		drv._posFile = ".save/driver_pos_"..id
+		EnsureDirectory(drv._posFile)
 
 		drv.TurtleAPI = { }
 		for k,v in pairs(turtle) do
@@ -100,50 +101,21 @@ function TurtleDriver:_suckUp(...) return self.TurtleAPI.suckUp(...) end
 function TurtleDriver:_suckDown(...) return self.TurtleAPI.suckDown(...) end
 
 function TurtleDriver:_beginSavePosition(x, y, z, dx, dz)
-	local t = BeginSaveTable(".save/driver_pos_"..self._id,
-	{
-		["x"] = x,
-		["y"] = y,
-		["z"] = z,
-		["dx"] = dx,
-		["dz"] = dz,
-	})
-
-	if t == false then
-		return false
-	end
-
 	local d = self
+	local t = BeginSaveTable(d._posFile, { ["x"] = x, ["y"] = y, ["z"] = z, ["dx"] = dx, ["dz"] = dz })
+	if t == false then return false end
 	return function(c)
 		if t(c) then
-			d._x = x
-			d._y = y
-			d._z = z
-			d._dx = dx
-			d._dz = dz
+			d._x, d._y, d._z, d._dx, d._dz = x, y, z, dx, dz
 		end
 	end
 end
 
-function TurtleDriver:SavePosition()
-	return SaveTable(".save/driver_pos_"..self._id,
-	{
-		["x"] = self._x,
-		["y"] = self._y,
-		["z"] = self._z,
-		["dx"] = self._dx,
-		["dz"] = self._dz,
-	})
-end
-
-function TurtleDriver:LoadPosition()
-	local t = LoadTable(".save/driver_pos_"..self._id)
+function TurtleDriver:_restorePosition()
+	local d = self
+	local t = LoadTable(d._posFile)
 	if t ~= nil then
-		self._x = t["x"]
-		self._y = t["y"]
-		self._z = t["z"]
-		self._dx = t["dx"]
-		self._dz = t["dz"]
+		d._x, d._y, d._z, d._dx, d._dz = t["x"], t["y"], t["z"], t["dx"], t["dz"]
 		return true
 	end
 	return false
@@ -386,11 +358,11 @@ function TurtleDriver:_doMoveOperation(x, y, z, dx, dz, op)
 	if self:Update() then
 		local t = self:_beginSavePosition(x, y, z, dx, dz)
 		if t ~= false then
-			local s = op()
-			if t(s == false) then
+			if t(op() == false) then
 				sleep(self._moveSleepTime)
+				return true
 			end
-			return s
+			return false
 		end
 	end
 	return false
