@@ -58,7 +58,7 @@ function Log(level, formatString, ...)
 
 	if level <= __log_level_file then
 		local remaining = fs.getFreeSpace(__log_file_path)
-		local len = strlen(output)
+		local len = output:len()
 		if remaining < len + 128 and not __log_disk_full then
 			local diskFullMessage = ("[%s] disk full"):format(ts)
 			if remaining > 128 then	
@@ -111,11 +111,11 @@ function EnsureDirectory(file)
 		return false
 	end
 
-	local fileLen = strlen(file)
+	local fileLen = file:len()
 	local fname = fs.getName(file)
-	local fnameLen = strlen(fname) + 1
+	local fnameLen = fname:len() + 1
 	if fnameLen < fileLen then
-		return fs.makeDir(strlower(strsub(file, 1, fileLen - fnameLen)))
+		return fs.makeDir((file:sub(1, fileLen - fnameLen)):lower())
 	end
 
 	return true
