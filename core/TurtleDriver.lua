@@ -27,10 +27,6 @@ TurtleDriver = class("TurtleDriver",
 		drv._dx = 1
 		drv._dz = 0
 
-		if drv:_restorePosition() then
-			Message("Restored position: (%d, %d, %d, %d, %d)", drv._x, drv._y, drv._z, drv._dx, drv._dz)
-		end
-
 		drv._selectSleepTime = 0.05
 		drv._dropSleepTime = 0.05
 		drv._retrySleepTime = 0.2
@@ -53,6 +49,10 @@ TurtleDriver = class("TurtleDriver",
 
 		drv._posFile = ".save/driver_pos_"..id
 		EnsureDirectory(drv._posFile)
+		
+		if drv:_restorePosition() then
+			Message("Restored position: (%d, %d, %d, %d, %d)", drv._x, drv._y, drv._z, drv._dx, drv._dz)
+		end
 
 		drv.TurtleAPI = { }
 		for k,v in pairs(turtle) do
