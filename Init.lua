@@ -30,11 +30,11 @@ local __log_level_console = k_level_critical
 local __log_level_file = k_level_error
 
 function Log(level, f, ...)
-	if level > __log_level_file and level > __log_level_console) then
+	if level > __log_level_file and level > __log_level_console then
 		return
 	end
 
-	if (type(f) ~= "string")
+	if type(f) ~= "string" then
 		Log(k_level_error, "Invalid format string provided.")
 		return
 	end
