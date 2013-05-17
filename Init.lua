@@ -1,10 +1,10 @@
 local context = getfenv()
 
-local __pragma_once = { }
 local __FILE__ = "Init.lua"
 local __include_stack = { __FILE__ }
+local __pragma_once = { [__FILE__] = true }
+local __pragma_once_result = { [__FILE__] = nil }
 
-__pragma_once[__FILE__] = true
 function PRAGMA_ONCE()
 	if not __pragma_once[__FILE__] then
 		__pragma_once[__FILE__] = true
@@ -29,24 +29,26 @@ local k_level_verbose = 10
 local __log_level_console = k_level_critical
 local __log_level_file = k_level_error
 
-function Log(level, f, ...)
+function Log(level, formatString, ...)
 	if level > __log_level_file and level > __log_level_console then
 		return
 	end
 
-	if type(f) ~= "string" then
+	if type(formatString) ~= "string" then
 		Log(k_level_error, "Invalid format string provided.")
 		return
 	end
 
 	local msg
 	local args = { ... }
-	local success, err = pcall(function() msg = f:format(unpack(args)) end)
+	local success, err = pcall(function() msg = formatString:format(unpack(args)) end)
 	if not success then
 		if err ~= nil then
 			Log(k_level_error, "Error with format string: %s", tostring(err))
+			Log(k_level_error, "%s", formatString)
 		else
-			Log(k_level_error, "Error with format string.")
+			Log(k_level_error, "Error with format string:")
+			Log(k_level_error, "%s", formatString)
 		end
 		return
 	end
@@ -167,14 +169,14 @@ function Include(file)
 				local success, err = pcall(function() result = setfenv(chunk, context)() or true end)
 				if not success then
 					if not rawequal(err, __pragma_once) then
-						Error("Failed to include %s: %s", file, err)
+						Error("Failed to include %s: %s", file, tostring(err))
 					else
-						result = __pragma_once[__FILE__]
+						result = __pragma_once_result[__FILE__]
 						included = true
 					end
 				else
 					if __pragma_once[__FILE__] then
-						__pragma_once[__FILE__] = result
+						__pragma_once_result[__FILE__] = result
 					end
 					included = true
 				end
