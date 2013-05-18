@@ -107,7 +107,9 @@ function TurtleDriver:_beginSavePosition(x, y, z, dx, dz)
 	return function(c)
 		if t(c) then
 			d._x, d._y, d._z, d._dx, d._dz = x, y, z, dx, dz
+			return true
 		end
+		return false
 	end
 end
 
