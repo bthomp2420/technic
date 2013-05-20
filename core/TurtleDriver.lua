@@ -321,8 +321,6 @@ function TurtleDriver:ProcessInventory(mode)
 	return result
 end
 
-
-
 function TurtleDriver:Update()
 	-- support manual mode operation
 	local inventoryMode = self._inventoryMode
@@ -337,7 +335,7 @@ function TurtleDriver:Update()
 		-- if the turtle is still dead in the water then end the program
 		-- TODO: add refuel mode that utilizes an additional slot & ender chest to supply
 		-- fuel to turtles remotely
-		Assert(not self:NeedsFuel(), "Out of fuel.")
+		Assert(self:HasFuel(), "Out of fuel.")
 	end
 	
 	self._nextUpdate = self._nextUpdate - 1
