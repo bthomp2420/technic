@@ -9,7 +9,7 @@ TurtleExecutor = class("TurtleExecutor",
 
 		o._computerId = os.getComputerLabel()
 		if not o._computerId or o._computerId == "" then
-			o._computerId = ("turtle-%d"):format(os.getComputerID())
+			o._computerId = ("t%d"):format(os.getComputerID())
 			os.setComputerLabel(o._computerId)
 		end
 
