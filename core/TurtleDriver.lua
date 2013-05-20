@@ -23,9 +23,7 @@ TurtleDriver = class("TurtleDriver",
 			"    manual 			= user must manually unload and refuel within custom module\n"..
 			"    refuel (default)	= only refuels as needed and requires user to empty the contents of the turtle when full\n"..
 			"    junk				= automatically refuels and drops any item that matches the first 4 inventory slots\n"..
-			"    ender-chest		= uses an ender chest in the first slot to send items to a distribution plant\n"
-		)
-		
+			"    ender-chest		= uses an ender chest in the first slot to send items to a distribution plant\n")
 		drv._config = config
 
 		function switch(t)
@@ -235,7 +233,7 @@ end
 
 function TurtleDriver:NeedsFuel()
 	local fuelLevel = self:_getFuelLevel()
-	return fuelLevel ~= "unlimited" and fuelLevel < self:_minFuelLevel
+	return fuelLevel ~= "unlimited" and fuelLevel < self._minFuelLevel
 end
 
 function TurtleDriver:ProcessInventory(mode)
