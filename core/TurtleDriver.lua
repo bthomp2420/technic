@@ -254,7 +254,7 @@ function TurtleDriver:ProcessInventory(mode)
 			result = result + 1
 		elseif mode >= k_refuel_cleanup and chestSlot ~= i and self:NeedsFuel() and self:RefuelFromSlot(i) then
 			result = result + 1
-		elseif mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
+		elseif mode > k_refuel_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
 			if inventoryMode == k_inventory_mode_drop_junk then
 				for j = 1, junkCount, 1 do
 					if self:CompareSlots(i, j) then
