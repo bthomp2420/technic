@@ -15,7 +15,7 @@ end
 
 local __session_start_time = os.clock()
 local __session_id = math.floor(__session_start_time)
-local __log_file_path = ("log_session_%d"):format(__session_id)
+local __log_file_path = ("logs/log_session_%d"):format(__session_id)
 local __log_disk_full = false
 
 local k_level_assert = -1
@@ -56,7 +56,7 @@ function Log(level, formatString, ...)
 	local ts = textutils.formatTime(os.time(), false)
 	local output = ("[%s] %s"):format(ts, msg)
 
-	if level <= __log_level_file then
+	if level <= __log_level_file and EnsureDirectory(__log_file_path) then
 		local remaining = fs.getFreeSpace(__log_file_path)
 		local len = output:len()
 		if remaining < len + 128 and not __log_disk_full then
@@ -76,7 +76,7 @@ function Log(level, formatString, ...)
 		end
 	end
 
-	if level <= __log_level_file and not __log_disk_full then
+	if level <= __log_level_file and not __log_disk_full and EnsureDirectory(__log_file_path) then
 		local f = fs.open(__log_file_path, "a")
 		if f ~= nil then
 			f.write(output)
@@ -109,6 +109,10 @@ end
 function EnsureDirectory(file)
 	if file == nil or type(file) ~= "string" then
 		return false
+	end
+
+	if fs.exists(file) then
+		return true
 	end
 
 	local fileLen = file:len()
