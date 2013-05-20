@@ -8,8 +8,8 @@ TurtleExecutor = class("TurtleExecutor",
 		o._storedStackSize = 0
 
 		o._computerId = os.getComputerLabel()
-		if o._computerId == nil or o._computerId == "" then
-			o._computerId = ("turtle-%d"):format(os.getComputerId())
+		if not o._computerId or o._computerId == "" then
+			o._computerId = ("turtle-%d"):format(os.getComputerID())
 			os.setComputerLabel(o._computerId)
 		end
 
