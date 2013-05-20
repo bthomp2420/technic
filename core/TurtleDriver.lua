@@ -5,20 +5,55 @@ local k_refuel_cleanup = 1
 local k_partial_cleanup = 2
 local k_full_cleanup = 3
 
-local k_inventory_mode_drop_junk = 0
-local k_inventory_mode_ender_chest = 1
-local k_inventory_mode_manual = 2
+local k_inventory_mode_manual = -1
+local k_inventory_mode_refuel_only = 0
+local k_inventory_mode_drop_junk = 1
+local k_inventory_mode_ender_chest = 2
 
 TurtleDriver = class("TurtleDriver",
 	function(drv, id)
 		if not id then id = "default" end
 		
+		-- load or create the config file for the turtle driver
 		local config = LoadConfig("config/turtle.cfg.lua",
-		{
-			["description"] = "k_inventory_mode_manual = 0, k_inventory_mode_ender_chest = 1, k_inventory_mode_manual = 2",
-			["mode"] = k_inventory_mode_manual,
-		})
+			{
+				["mode"] = "refuel",
+			},
+			"Modes:"..
+			"    manual 			= user must manually unload and refuel within custom module\n"..
+			"    refuel (default)	= only refuels as needed and requires user to empty the contents of the turtle when full\n"..
+			"    junk				= automatically refuels and drops any item that matches the first 4 inventory slots\n"..
+			"    ender-chest		= uses an ender chest in the first slot to send items to a distribution plant\n"
+		)
+		
 		drv._config = config
+
+		function switch(t)
+			t.case = function (self, x)
+				local v
+				if x then v = self[x] end
+				if not v then
+					x = "<default>"
+					v = self.default
+				end
+				if v then
+					if type(v) == "function" then
+						return v(x, self), x
+					else
+						return v, x
+					end
+				end
+			end
+			return t
+		end
+
+		local modes = switch {
+			["manual"] = k_inventory_mode_manual,
+			["junk"] = k_inventory_mode_drop_junk,
+			["ender-chest"] = k_inventory_mode_ender_chest,
+			["refuel"] = k_inventory_mode_refuel_only,
+			default = k_inventory_mode_manual
+		}
 
 		drv._id = id
 		drv._x = 0
@@ -34,12 +69,16 @@ TurtleDriver = class("TurtleDriver",
 		drv._digSleepTime = 0.05
 		drv._attackSleepTime = 0.05
 
-		drv._inventoryMode = config["mode"]
-		drv._nextUpdate = 16
+		local mode, configMode = modes:case(config["mode"])
+		Message("Inventory Mode: %s", configMode)
+
+		drv._inventoryMode = mode
+		drv._nextUpdate = 0
 		drv._emptySlots = 0
 		drv._activeSlot = -1
 		drv._junkCount = 0
 		drv._chestSlot = 0
+		drv._minFuelLevel = 2048
 
 		if drv._inventoryMode == k_inventory_mode_drop_junk then
 			drv._junkCount = 4
@@ -189,10 +228,23 @@ function TurtleDriver:RefuelFromSlot(a, c)
 	return self:SlotHasItems(a) and self:SelectSlot(a) and self:_refuel(c) and self:IsSlotEmpty(a)
 end
 
+function TurtleDriver:HasFuel()
+	local fuelLevel = self:_getFuelLevel()
+	return fuelLevel == "unlimited" or fuelLevel > 0
+end
+
+function TurtleDriver:NeedsFuel()
+	local fuelLevel = self:_getFuelLevel()
+	return fuelLevel ~= "unlimited" and fuelLevel < self:_minFuelLevel
+end
+
 function TurtleDriver:ProcessInventory(mode)
 	local result = 0
 
 	local inventoryMode = self._inventoryMode
+	if inventoryMode <= k_inventory_mode_manual then
+		return false
+	end
 
 	local junkCount = self._junkCount
 	local initialSlot = self._activeSlot
@@ -202,7 +254,7 @@ function TurtleDriver:ProcessInventory(mode)
 	for i = junkCount + 1, 16, 1 do
 		if self:IsSlotEmpty(i) and (inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i) then
 			result = result + 1
-		elseif mode >= k_refuel_cleanup and chestSlot ~= i and self:_getFuelLevel() < 1024 and self:RefuelFromSlot(i) then
+		elseif mode >= k_refuel_cleanup and chestSlot ~= i and self:NeedsFuel() and self:RefuelFromSlot(i) then
 			result = result + 1
 		elseif mode ~= k_no_cleanup and (mode == k_full_cleanup or self:IsSlotFull(i)) then
 			if inventoryMode == k_inventory_mode_drop_junk then
@@ -218,7 +270,7 @@ function TurtleDriver:ProcessInventory(mode)
 		end
 	end
 
-	if mode ~= k_no_cleanup then
+	if mode > k_refuel_cleanup then
 		if inventoryMode == k_inventory_mode_drop_junk then
 			for i = 1, junkCount, 1 do
 				 if (mode == k_full_cleanup or self:IsSlotFull(i)) then
@@ -237,6 +289,7 @@ function TurtleDriver:ProcessInventory(mode)
 			-- check all slots for items to drop in the ender chest
 			for i = 1, 16, 1 do
 				if i ~= chestSlot and not self:IsSlotEmpty(i) then
+					-- place the ender chest only if it hasn't already been placed
 					if self:IsSlotEmpty(chestSlot) or (self:SelectSlot(chestSlot) and self:PlaceForward()) then
 						self:DropSlot(i)
 					end
@@ -259,8 +312,7 @@ function TurtleDriver:ProcessInventory(mode)
 		end
 	end
 
-	-- big assumption of ender chest mode is that the chest slot is always either empty and the chest is infront of
-	-- the turtle, or it has a single ender chest...
+	-- assume that the block directly infront of the turtle is *always* the ender chest if the slot is empty
 	if inventoryMode == k_inventory_mode_ender_chest then
 		if self:IsSlotEmpty(chestSlot) and self:SelectSlot(chestSlot) then
 			self:DigForward()
@@ -271,33 +323,46 @@ function TurtleDriver:ProcessInventory(mode)
 	return result
 end
 
-function TurtleDriver:Update()
-	if self:_getFuelLevel() < 128 then
-		self._emptySlots = self:ProcessInventory(k_refuel_cleanup)
-		self._nextUpdate = 16
-	else
-		self._nextUpdate = self._nextUpdate - 1
-		
-		if self._nextUpdate == 0 then
-			self._emptySlots = self:ProcessInventory(k_no_cleanup)
-			self._nextUpdate = 16
-		end
-		
-		if self._emptySlots == 0 then
-			self._emptySlots = self:ProcessInventory(k_partial_cleanup)
-		end
-		
-		if self._emptySlots == 0 then
-			self._emptySlots = self:ProcessInventory(k_full_cleanup)
-		end
 
-		if self._emptySlots == 0 then
-			self._emptySlots = -1
-			self._nextUpdate = 64
-		end
+
+function TurtleDriver:Update()
+	-- support manual mode operation
+	local inventoryMode = self._inventoryMode
+	if inventoryMode <= k_inventory_mode_manual then
+		return self:HasFuel()
 	end
-	local fuelLevel = self:_getFuelLevel()
-	return (fuelLevel == "unlimited" or fuelLevel > 0) and self._emptySlots ~= -1
+
+	-- if the turtle needs fuel, try to refuel from the contents of the inventory
+	if self:NeedsFuel() then
+		self._emptySlots = self:ProcessInventory(k_refuel_cleanup)
+
+		-- if the turtle is still dead in the water then end the program
+		-- TODO: add refuel mode that utilizes an additional slot & ender chest to supply
+		-- fuel to turtles remotely
+		Assert(not self:NeedsFuel(), "Out of fuel.")
+	end
+	
+	self._nextUpdate = self._nextUpdate - 1
+		
+	if self._nextUpdate <= 0 then
+		self._emptySlots = self:ProcessInventory(k_no_cleanup)
+		self._nextUpdate = 16
+	end
+	
+	if self._emptySlots == 0 then
+		self._emptySlots = self:ProcessInventory(k_partial_cleanup)
+	end
+	
+	if self._emptySlots == 0 then
+		self._emptySlots = self:ProcessInventory(k_full_cleanup)
+	end
+
+	if self._emptySlots == 0 then
+		self._emptySlots = -1
+		self._nextUpdate = 64
+	end
+
+	return self:HasFuel() and self._emptySlots ~= -1
 end
 
 function TurtleDriver:AttackForward()

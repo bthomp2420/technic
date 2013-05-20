@@ -121,7 +121,7 @@ function EnsureDirectory(file)
 	return true
 end
 
-function LoadConfig(file, d)
+function LoadConfig(file, d, comment)
 	local r = nil
 	local f, e = loadfile(file)
 	if f ~= nil then
@@ -138,7 +138,7 @@ function LoadConfig(file, d)
 
 		if r ~= nil and type(r) == "table" then
 			EnsureDirectory(file)
-			SaveTable(file, r)
+			SaveTable(file, r, comment)
 		else
 			r = nil
 		end

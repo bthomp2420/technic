@@ -34,10 +34,13 @@ function BeginSaveTable(file, t)
 	return false
 end
 
-function SaveTable(file, t)
+function SaveTable(file, t, comment)
 	local data = serialize(t)
 	local f = fs.open(file, "w")
 	if f ~= nil then
+		if comment and type(comment) == "string" then
+			f.write("-- "..comment:gsub("\n", "\n-- ").."\n\n")
+		end
 		f.write(data)
 		f.close()
 		return true
