@@ -228,7 +228,7 @@ end
 
 function TurtleDriver:RefuelFromSlot(a, c) 
 	if self:IsSlotEmpty(a) or self._fuelSlotState[a] then
-		self._fuelSlotState[j] = self:SlotHasItems(a)
+		self._fuelSlotState[a] = self:SlotHasItems(a)
 		return false
 	end
 	local result = self:SelectSlot(a) and self:_refuel(c)
