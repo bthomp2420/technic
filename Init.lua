@@ -15,7 +15,7 @@ end
 
 local __session_start_time = os.clock()
 local __session_id = math.floor(__session_start_time)
-local __log_file_path = ("logs/log_session_%d"):format(__session_id)
+local __log_file_path = ("logs/%d"):format(__session_id)
 local __log_disk_full = false
 
 local k_level_assert = -1
@@ -119,7 +119,8 @@ function EnsureDirectory(file)
 	local fname = fs.getName(file)
 	local fnameLen = fname:len() + 1
 	if fnameLen < fileLen then
-		return fs.makeDir((file:sub(1, fileLen - fnameLen)):lower())
+		local dname = (file:sub(1, fileLen - fnameLen)):lower()
+		return fs.isDir(dname) or fs.makeDir(dname)
 	end
 
 	return true
