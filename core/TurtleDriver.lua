@@ -214,11 +214,11 @@ end
 function TurtleDriver:DropSlot(a, c)
 	if self:SlotHasItems(a) and self:SelectSlot(a) then
 		if c and self:_drop(c) then
-			drv._fuelSlotState[a] = false
+			self._fuelSlotState[a] = false
 			sleep(self._dropSleepTime)
 			return self:IsSlotEmpty(a)
 		elseif self:_drop() then
-			drv._fuelSlotState[a] = false
+			self._fuelSlotState[a] = false
 			sleep(self._dropSleepTime)
 			return self:IsSlotEmpty(a)
 		end
@@ -227,12 +227,12 @@ function TurtleDriver:DropSlot(a, c)
 end
 
 function TurtleDriver:RefuelFromSlot(a, c) 
-	if self:IsSlotEmpty(a) or drv._fuelSlotState[a] then
-		drv._fuelSlotState[j] = self:SlotHasItems(a)
+	if self:IsSlotEmpty(a) or self._fuelSlotState[a] then
+		self._fuelSlotState[j] = self:SlotHasItems(a)
 		return false
 	end
 	local result = self:SelectSlot(a) and self:_refuel(c)
-	drv._fuelSlotState[a] = not result or self:SlotHasItems(a)
+	self._fuelSlotState[a] = not result or self:SlotHasItems(a)
 	return result
 end
 
@@ -310,8 +310,8 @@ function TurtleDriver:ProcessInventory(mode)
 			if self:IsSlotEmpty(i) and (inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= i) then
 				for j = lastEmpty - 1, i + 1, -1 do
 					if self:SelectSlot(j) and (inventoryMode ~= k_inventory_mode_ender_chest or chestSlot ~= j) then
-						drv._fuelSlotState[j] = false
 						self:_transferTo(i)
+						self._fuelSlotState[j] = false
 						break
 					end
 					lastEmpty = j
