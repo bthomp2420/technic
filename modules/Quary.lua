@@ -45,16 +45,10 @@ function QuaryHandler:Run(executor, driver, desc)
 	--     * alternate each z
 	local layer = math.floor((y + 2) / 3)
 	local layerFactor = (1 - (layer % 2) * 2) * ((h % 2) * 2 - 1)
-	local xDirection = layerFactor * (1 - (z % 2) * 2)
-	while not (driver:GetDx() ==  dx * xDirection and driver:GetDz() == dz * xDirection) do
-		if driver:GetDz() == dx * xDirection then
-			driver:TurnRight()
-		else
-			driver:TurnLeft()
-		end
-	end
+	local direction = layerFactor * (1 - (z % 2) * 2)
+	driver:Face(dx * direction, dz * direction)
 
-	local xEnd = (w - 1) * ((xDirection + 1) / 2)
+	local xEnd = (w - 1) * ((direction + 1) / 2)
 	local zEnd = (h - 1) * ((layerFactor + 1) / 2)
 	local yEnd = d - 1
 
@@ -70,27 +64,30 @@ function QuaryHandler:Run(executor, driver, desc)
 				executor:Pop()
 				return true
 			end
+
+			-- mine down one space to the next layer
 			driver:MineDown()
 		else
-			if xDirection * layerFactor < 0 then
-				driver:TurnRight()
+
+			-- face toward the next row to strip and then mine forward to advance to the next row
+			-- the next iteration on the loop will align the turtle in the right direction
+			if direction * layerFactor < 0 then
+				driver:Face(-dz * direction, dx * direction)
 				driver:MineForward()
-				driver:TurnRight()
 			else
-				driver:TurnLeft()
+				driver:Face(dz * direction, -dx * direction)
 				driver:MineForward()
-				driver:TurnLeft()
 			end
 		end
 	else
-		if (x + xDirection >= 0 and x + xDirection <= w - 1) and (z >= 0 and z <= h - 1) then
+		if (x + direction >= 0 and x + direction <= w - 1) and (z >= 0 and z <= h - 1) then
 			driver:MineForward()
 		else
 			-- something bad happened and we are going out of bounds
 			Critical("Quary error: stepQuary failed to determine next step based on current turtle state")
 			Critical("x, z, y [dx, dz] = %d, %d, %d [%d, %d]", x, z, y, dx, dz)
 			Critical("xEnd, zEnd, yEnd = %d, %d, %d", xEnd, zEnd, yEnd)
-			Critical("layer, layerFactor, xDirection = %d, %d, %d", layer, layerFactor, xDirection)
+			Critical("layer, layerFactor, direction = %d, %d, %d", layer, layerFactor, direction)
 			return false
 		end
 	end
