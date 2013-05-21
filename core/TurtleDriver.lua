@@ -522,17 +522,17 @@ function TurtleDriver:MineUp()
 end
 
 function TurtleDriver:Face(dx, dz)
-	Assert(dx == 0 or dz == 0, "Either Dx or Dz need to be 0 since turtles cannot facing diagonally (%d, %d)", dx, dz)
+	Assert((dx == 0 or dz == 0) and (dx ~= dz), "Either Dx or Dz need to be 0 but not both (%d, %d)", dx, dz)
 	Assert(dx >= -1 and dx <= 1, "Dx must be in the range of [-1, 1] current value is %d", dx)
 	Assert(dz >= -1 and dz <= 1, "Dz must be in the range of [-1, 1] current value is %d", dz)
-	local turnLeft = (self._dz == dx)
+	local turnRight = (self._dz == dx and self._dx == -dz)
 	while not (self._dx == dx and self._dz == dz) do
-		if turnLeft then
-			if not self:TurnLeft() then
+		if turnRight then
+			if not self:TurnRight() then
 				sleep(self._retrySleepTime)
 			end
 		else
-			if not self:TurnRight() then
+			if not self:TurnLeft() then
 				sleep(self._retrySleepTime)
 			end
 		end

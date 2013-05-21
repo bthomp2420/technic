@@ -72,10 +72,10 @@ function QuaryHandler:Run(executor, driver, desc)
 			-- face toward the next row to strip and then mine forward to advance to the next row
 			-- the next iteration on the loop will align the turtle in the right direction
 			if direction * layerFactor < 0 then
-				driver:Face(-dz * direction, dx * direction)
+				driver:Face(dz * direction, -dx * direction)
 				driver:MineForward()
 			else
-				driver:Face(dz * direction, -dx * direction)
+				driver:Face(-dz * direction, dx * direction)
 				driver:MineForward()
 			end
 		end
