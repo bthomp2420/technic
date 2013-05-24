@@ -7,17 +7,14 @@ TurtleExecutor = class("TurtleExecutor",
 		o._handlers = { }
 		o._storedStackSize = 0
 
-		o._computerId = os.getComputerLabel()
-		if not o._computerId or o._computerId == "" then
-			o._computerId = ("t%d"):format(os.getComputerID())
-			os.setComputerLabel(o._computerId)
+		local computerId = os.getComputerLabel()
+		if not computerId or computerId == "" then
+			computerId = ("t%s"):format(os.getComputerID())
+			os.setComputerLabel(computerId)
 		end
 
-		Message("Computer Id: %s", o._computerId)
-
-		if not fs.isDir(".save") then
-			fs.makeDir(".save")
-		end
+		Message("Computer Id: %s", computerId)
+		o._computerId = computerId
 
 		if not fs.isDir(".save/stack") then
 			fs.makeDir(".save/stack")
