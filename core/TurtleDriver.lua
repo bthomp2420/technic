@@ -60,12 +60,12 @@ TurtleDriver = class("TurtleDriver",
 		drv._dx = 1
 		drv._dz = 0
 
-		drv._selectSleepTime = 0.05
-		drv._dropSleepTime = 0.05
-		drv._retrySleepTime = 0.2
-		drv._moveSleepTime = 0.2
-		drv._digSleepTime = 0.05
-		drv._attackSleepTime = 0.05
+		drv._selectSleepTime = 0.001
+		drv._dropSleepTime = 0.001
+		drv._retrySleepTime = 0.05
+		drv._moveSleepTime = 0.1
+		drv._digSleepTime = 0.001
+		drv._attackSleepTime = 0.001
 
 		drv._fuelSlotState = { }
 
