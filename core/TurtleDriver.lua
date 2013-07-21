@@ -226,6 +226,21 @@ function TurtleDriver:DropSlot(a, c)
 	return false
 end
 
+function TurtleDriver:DropSlotUp(a, c)
+	if self:SlotHasItems(a) and self:SelectSlot(a) then
+		if c and self:_dropUp(c) then
+			self._fuelSlotState[a] = false
+			sleep(self._dropSleepTime)
+			return self:IsSlotEmpty(a)
+		elseif self:_dropUp() then
+			self._fuelSlotState[a] = false
+			sleep(self._dropSleepTime)
+			return self:IsSlotEmpty(a)
+		end
+	end
+	return false
+end
+
 function TurtleDriver:RefuelFromSlot(a, c) 
 	if self:IsSlotEmpty(a) or self._fuelSlotState[a] then
 		self._fuelSlotState[a] = self:SlotHasItems(a)

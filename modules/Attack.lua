@@ -12,11 +12,11 @@ end
 
 function AttackHandler:Run(executor, driver, desc)
 	for i = 1, 16, 1 do
-		driver:DropSlot(i)
+		driver:DropSlotUp(i)
 	end
 
 	driver:SelectSlot(1)
-	
+
 	while driver:AttackForward() do end
 	while driver:Suck() do end
 	
