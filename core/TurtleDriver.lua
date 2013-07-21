@@ -108,6 +108,8 @@ function TurtleDriver:_getItemSpace(...) return self.TurtleAPI.getItemSpace(...)
 function TurtleDriver:_select(...) return self.TurtleAPI.select(...) end
 function TurtleDriver:_compareTo(...) return self.TurtleAPI.compareTo(...) end
 function TurtleDriver:_drop(...) return self.TurtleAPI.drop(...) end
+function TurtleDriver:_dropUp(...) return self.TurtleAPI.dropUp(...) end
+function TurtleDriver:_dropDown(...) return self.TurtleAPI.dropDown(...) end
 function TurtleDriver:_transferTo(...) return self.TurtleAPI.transferTo(...) end
 function TurtleDriver:_place(...) return self.TurtleAPI.place(...) end
 
